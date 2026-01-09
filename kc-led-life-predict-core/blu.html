@@ -11,6 +11,19 @@
 <p class="subtitle">BLU → System lifetime governance</p>
 
 <section>
+    <h2>CASE Selection</h2>
+
+  <label>Select Case:
+    <select id="caseSelect" onchange="loadCase()">
+      <option value="">-- Select CASE --</option>
+      <option value="CASE-AERO-001">CASE-AERO-001 (Aerospace)</option>
+      <option value="CASE-IND-001">CASE-IND-001 (Industrial)</option>
+      <option value="CASE-AUTO-001">CASE-AUTO-001 (Automotive)</option>
+    </select>
+  </label>
+   <p id="caseDesc" class="subtitle"></p>
+
+  <p id="caseDesc" class="subtitle"></p>
   <h2>System Usage Profile</h2>
 
   <label>Duty cycle (0~1):
