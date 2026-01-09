@@ -1,3 +1,8 @@
+function showProjectClaim() {
+  const text = generateProjectText(currentResult);
+  document.getElementById("claimText").innerText = text;
+}
+
 function generateProjectText(result) {
   if (!result || !result.L70_report) {
     return "Calculation not completed or insufficient data.";
