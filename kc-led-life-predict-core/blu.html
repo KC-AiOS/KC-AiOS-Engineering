@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>KC SYS LIFE STACK</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<h1>KC-SYS-LIFE-STACK</h1>
+<p class="subtitle">BLU → System lifetime governance</p>
+
+<section>
+  <h2>System Usage Profile</h2>
+
+  <label>Duty cycle (0~1):
+    <input id="duty" type="number" step="0.01" value="0.5">
+  </label>
+
+  <label>Brightness ratio:
+    <input id="brightness" type="number" step="0.01" value="0.7">
+  </label>
+
+  <label>Environment:
+    <select id="env">
+      <option value="INDOOR">Indoor</option>
+      <option value="INDUSTRIAL">Industrial</option>
+      <option value="AUTOMOTIVE">Automotive</option>
+      <option value="AEROSPACE">Aerospace / Marine</option>
+    </select>
+  </label>
+
+  <button onclick="runSystem()">Calculate System Life</button>
+</section>
+
+<section>
+  <h2>Result</h2>
+  <pre id="sysOutput"></pre>
+</section>
+
+<script src="js/blu-transfer.js"></script>
+<script src="js/sys-life-stack.js"></script>
+<script src="js/ui-sys.js"></script>
+</body>
+</html>
