@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>KC LED Life Predict Core</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<h1>KC-LED-LIFE-PREDICT-CORE</h1>
+<p class="subtitle">LM-80 data + TM-21 projection (engineering-grade)</p>
+
+<section>
+  <h2>1. LM-80 Raw Data</h2>
+  <table id="dataTable">
+    <thead>
+      <tr>
+        <th>Time (hrs)</th>
+        <th>Flux or R</th>
+        <th>Is R?</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <button onclick="addRow()">Add Row</button>
+</section>
+
+<section>
+  <h2>2. TM-21 Settings</h2>
+  <label>Sample Size:
+    <input type="number" id="sampleSize" value="20">
+  </label>
+  <label>Total Test Hours:
+    <input type="number" id="testHours" value="6000">
+  </label>
+  <label>Fit Mode:
+    <select id="fitMode">
+      <option value="LAST_5000H">LAST_5000H</option>
+      <option value="LAST_HALF">LAST_HALF</option>
+      <option value="MANUAL">MANUAL</option>
+    </select>
+  </label>
+</section>
+
+<section>
+  <h2>3. Result</h2>
+  <pre id="output">Press Calculate</pre>
+  <button onclick="calculate()">Calculate</button>
+</section>
+
+<script src="js/tm21-core.js"></script>
+<script src="js/ui.js"></script>
+</body>
+</html>
