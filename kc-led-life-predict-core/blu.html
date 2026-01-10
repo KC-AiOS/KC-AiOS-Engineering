@@ -23,7 +23,37 @@
   </label>
    <p id="caseDesc" class="subtitle"></p>
 
-  <p id="caseDesc" class="subtitle"></p>
+<section id="changeDeclare">
+  <h2>Change Declaration (Kernel Mode)</h2>
+
+  <label>Change Type:
+    <select id="changeType">
+      <option value="">-- Declare Change --</option>
+      <option value="BRIGHTNESS_UP">Brightness Increase</option>
+      <option value="TEMP_ENV">Environment Temperature Change</option>
+      <option value="USAGE_PROFILE">Usage Profile Change</option>
+    </select>
+  </label>
+
+  <label>Change Target:
+    <select id="changeTarget">
+      <option value="">-- Target --</option>
+      <option value="LED_CURRENT">LED Current</option>
+      <option value="POWER">BLU Power</option>
+      <option value="USAGE">Usage Pattern</option>
+    </select>
+  </label>
+
+  <button type="button" onclick="evaluateChange()">Evaluate Change</button>
+  <pre id="boundaryResult">Not Evaluated</pre>
+</section>
+
+<section id="boundaryGate">
+  <h2>Boundary & PF-change Decision</h2>
+  <pre id="pfDecision">Not Evaluated</pre>
+</section>
+
+  
   <h2>System Usage Profile</h2>
 
   <label>Duty cycle (0~1):
@@ -43,13 +73,20 @@
     </select>
   </label>
 
-  <button onclick="runSystem()">Calculate System Life</button>
+  <button type="button" onclick="requestDecision()">Request System Decision</button>
+
 </section>
 
 <section>
-  <h2>Result</h2>
+  <h2>System Verdict (KC-K2-BLU-LIFE)</h2>
+  <pre id="sysVerdict">No decision yet.</pre>
+</section>
+
+<section>
+  <h2>Kernel Output (Read-only)</h2>
   <pre id="sysOutput"></pre>
 </section>
+
 
 <script src="js/blu-transfer.js"></script>
 <script src="js/sys-life-stack.js"></script>
