@@ -1,30 +1,41 @@
-<h2>PCB Utility Rate Calculator</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PCB Utility Rate Calculator</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="calc.js" defer></script>
+</head>
 
-<label>PCB Width (mm)</label>
-<input id="pcb_w">
+<body>
+  <h2>PCB Utility Rate Calculator</h2>
 
-<label>PCB Height (mm)</label>
-<input id="pcb_h">
+  <div class="box">
+    <label>PCB Width (mm)</label>
+    <input id="pcb_w" type="number" step="0.01" />
 
-<label>Panel Width (mm)</label>
-<input id="panel_w" value="457">
+    <label>PCB Height (mm)</label>
+    <input id="pcb_h" type="number" step="0.01" />
 
-<label>Panel Height (mm)</label>
-<input id="panel_h" value="610">
+    <label>Panel Width (mm)</label>
+    <input id="panel_w" type="number" value="457" step="0.01" />
 
-<label>Edge Margin (mm)</label>
-<input id="edge" value="5">
+    <label>Panel Height (mm)</label>
+    <input id="panel_h" type="number" value="610" step="0.01" />
 
-<label>Gap (mm)</label>
-<input id="gap" value="2">
+    <label>Edge Margin (mm)</label>
+    <input id="edge" type="number" value="5" step="0.01" />
 
-<button onclick="runCalc()">Calculate</button>
+    <label>Gap (mm)</label>
+    <input id="gap" type="number" value="2" step="0.01" />
 
-<hr>
+    <button id="btnCalc" type="button">Calculate</button>
+  </div>
 
-<div id="result">
-  <p>X direction: <span id="nx"></span></p>
-  <p>Y direction: <span id="ny"></span></p>
-  <p>Total PCB: <span id="total"></span></p>
-  <p>Utility Rate: <span id="util"></span> %</p>
-</div>
+  <hr />
+
+  <h3>Result</h3>
+  <div id="result" class="result"></div>
+</body>
+</html>
