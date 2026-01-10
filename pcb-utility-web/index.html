@@ -1,0 +1,30 @@
+<h2>PCB Utility Rate Calculator</h2>
+
+<label>PCB Width (mm)</label>
+<input id="pcb_w">
+
+<label>PCB Height (mm)</label>
+<input id="pcb_h">
+
+<label>Panel Width (mm)</label>
+<input id="panel_w" value="457">
+
+<label>Panel Height (mm)</label>
+<input id="panel_h" value="610">
+
+<label>Edge Margin (mm)</label>
+<input id="edge" value="5">
+
+<label>Gap (mm)</label>
+<input id="gap" value="2">
+
+<button onclick="runCalc()">Calculate</button>
+
+<hr>
+
+<div id="result">
+  <p>X direction: <span id="nx"></span></p>
+  <p>Y direction: <span id="ny"></span></p>
+  <p>Total PCB: <span id="total"></span></p>
+  <p>Utility Rate: <span id="util"></span> %</p>
+</div>
