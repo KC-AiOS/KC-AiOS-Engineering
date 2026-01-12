@@ -40,10 +40,39 @@
   <!-- 🔹 輸入區（Scrollable） -->
   <main class="kc-input-zone">
 
-    <section class="block">
-      <h2>1. LM-80 Raw Data</h2>
-      <!-- 原本的 LM-80 input table / rows 放這 -->
-    </section>
+<section class="block">
+  <h2>1. LM-80 Raw Data</h2>
+
+  <table border="1" cellpadding="6" cellspacing="0">
+    <thead>
+      <tr>
+        <th>Time (hrs)</th>
+        <th>Flux or R</th>
+        <th>Is R?</th>
+      </tr>
+    </thead>
+    <tbody id="lm80-table">
+      <tr>
+        <td><input class="lm80-time" value="0"></td>
+        <td><input class="lm80-flux" value="1.0"></td>
+        <td><input type="checkbox" class="lm80-isr" checked></td>
+      </tr>
+      <tr>
+        <td><input class="lm80-time" value="3000"></td>
+        <td><input class="lm80-flux" value="0.92"></td>
+        <td><input type="checkbox" class="lm80-isr" checked></td>
+      </tr>
+      <tr>
+        <td><input class="lm80-time" value="6000"></td>
+        <td><input class="lm80-flux" value="0.88"></td>
+        <td><input type="checkbox" class="lm80-isr" checked></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <button onclick="addLM80Row()">Add Row</button>
+</section>
+
 
     <section class="block">
       <h2>2. TM-21 Settings</h2>
