@@ -3,12 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <title>KC-LED-LIFE-PREDICT-CORE</title>
-  <link rel="stylesheet" href="style.css" />
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="./style.css" />
 </head>
 
 <body>
 
-  <!-- 🔹 模組標題（Frozen） -->
+  <!-- 🔹 模組標題（Frozen Header） -->
   <header class="kc-header">
     <h1>KC-LED-LIFE-PREDICT-CORE</h1>
     <div class="subtitle">LM-80 + TM-21 (engineering-grade)</div>
@@ -16,10 +18,18 @@
 
   <!-- 🔹 結果層（Frozen Decision Plane） -->
   <section class="kc-result-layer">
-    <div class="result-item status">Status: <span id="status">WAIT</span></div>
-    <div class="result-item">L70: <span id="l70">--</span> h</div>
-    <div class="result-item">Life Cap: <span id="cap">--</span> h</div>
-    <div class="result-item">Claim: <span id="claim">--</span></div>
+    <div class="result-item status">
+      Status: <span id="status">WAIT</span>
+    </div>
+    <div class="result-item">
+      L70: <span id="l70">--</span> h
+    </div>
+    <div class="result-item">
+      Life Cap: <span id="cap">--</span> h
+    </div>
+    <div class="result-item">
+      Claim: <span id="claim">--</span>
+    </div>
 
     <div class="result-actions">
       <button onclick="exportJSON()">Export JSON</button>
@@ -32,17 +42,17 @@
 
     <section class="block">
       <h2>1. LM-80 Raw Data</h2>
-      <!-- 你原本的 table / input 放這 -->
+      <!-- 原本的 LM-80 input table / rows 放這 -->
     </section>
 
     <section class="block">
       <h2>2. TM-21 Settings</h2>
-      <!-- settings inputs -->
+      <!-- Sample size / test hours / fit mode -->
     </section>
 
     <section class="block">
       <h2>3. Usage / Environment</h2>
-      <!-- usage profile -->
+      <!-- duty cycle / brightness / environment -->
     </section>
 
     <section class="block">
@@ -51,10 +61,11 @@
 
   </main>
 
-<script src="./js/tm21-core.js"></script>
-<script src="./js/sys-life-stack.js"></script>
-<script src="./js/ui.js"></script>
-<script src="./js/main.js"></script>
+  <!-- 🔹 JS（順序非常重要，請勿更動） -->
+  <script src="./js/tm21-core.js"></script>
+  <script src="./js/sys-life-stack.js"></script>
+  <script src="./js/ui.js"></script>
+  <script src="./js/main.js"></script>
 
 </body>
 </html>
