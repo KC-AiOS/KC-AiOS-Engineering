@@ -2,48 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>KC-LED-LIFE-PREDICT-CORE</title>
-
-  <!-- CSS -->
-  <link rel="stylesheet" href="./style.css" />
+  <title>KC LED Life Predict Core</title>
+  <link rel="stylesheet" href="css/style.css" />
 </head>
-
 <body>
 
-  <!-- 🔹 模組標題（Frozen Header） -->
-  <header class="kc-header">
-    <h1>KC-LED-LIFE-PREDICT-CORE</h1>
-    <div class="subtitle">LM-80 + TM-21 (engineering-grade)</div>
-  </header>
+<h1>KC-LED-LIFE-PREDICT-CORE</h1>
+<p class="subtitle">LM-80 data + TM-21 projection (engineering-grade)</p>
 
-  <!-- 🔹 結果層（Frozen Decision Plane） -->
-  <section class="kc-result-layer">
-    <div class="result-item status">
-      Status: <span id="status">WAIT</span>
-    </div>
-    <div class="result-item">
-      L70: <span id="l70">--</span> h
-    </div>
-    <div class="result-item">
-      Life Cap: <span id="cap">--</span> h
-    </div>
-    <div class="result-item">
-      Claim: <span id="claim">--</span>
-    </div>
-
-    <div class="result-actions">
-      <button onclick="exportJSON()">Export JSON</button>
-      <button onclick="exportText()">Generate Project Text</button>
-    </div>
-  </section>
-
-  <!-- 🔹 輸入區（Scrollable） -->
-  <main class="kc-input-zone">
-
-<section class="block">
+<section>
   <h2>1. LM-80 Raw Data</h2>
-
-  <table border="1" cellpadding="6" cellspacing="0">
+  <table id="dataTable">
     <thead>
       <tr>
         <th>Time (hrs)</th>
@@ -51,50 +20,35 @@
         <th>Is R?</th>
       </tr>
     </thead>
-    <tbody id="lm80-table">
-      <tr>
-        <td><input class="lm80-time" value="0"></td>
-        <td><input class="lm80-flux" value="1.0"></td>
-        <td><input type="checkbox" class="lm80-isr" checked></td>
-      </tr>
-      <tr>
-        <td><input class="lm80-time" value="3000"></td>
-        <td><input class="lm80-flux" value="0.92"></td>
-        <td><input type="checkbox" class="lm80-isr" checked></td>
-      </tr>
-      <tr>
-        <td><input class="lm80-time" value="6000"></td>
-        <td><input class="lm80-flux" value="0.88"></td>
-        <td><input type="checkbox" class="lm80-isr" checked></td>
-      </tr>
-    </tbody>
+    <tbody></tbody>
   </table>
-
-  <button onclick="addLM80Row()">Add Row</button>
+  <button onclick="addRow()">Add Row</button>
 </section>
 
+<section>
+  <h2>2. TM-21 Settings</h2>
+  <label>Sample Size:
+    <input type="number" id="sampleSize" value="20">
+  </label>
+  <label>Total Test Hours:
+    <input type="number" id="testHours" value="6000">
+  </label>
+  <label>Fit Mode:
+    <select id="fitMode">
+      <option value="LAST_5000H">LAST_5000H</option>
+      <option value="LAST_HALF">LAST_HALF</option>
+      <option value="MANUAL">MANUAL</option>
+    </select>
+  </label>
+</section>
 
-    <section class="block">
-      <h2>2. TM-21 Settings</h2>
-      <!-- Sample size / test hours / fit mode -->
-    </section>
+<section>
+  <h2>3. Result</h2>
+  <pre id="output">Press Calculate</pre>
+  <button onclick="calculate()">Calculate</button>
+</section>
 
-    <section class="block">
-      <h2>3. Usage / Environment</h2>
-      <!-- duty cycle / brightness / environment -->
-    </section>
-
-    <section class="block">
-      <button onclick="calculate()">Calculate</button>
-    </section>
-
-  </main>
-
-  <!-- 🔹 JS（順序非常重要，請勿更動） -->
-  <script src="./js/tm21-core.js"></script>
-  <script src="./js/sys-life-stack.js"></script>
-  <script src="./js/ui.js"></script>
-  <script src="./js/main.js"></script>
-
+<script src="js/tm21-core.js"></script>
+<script src="js/ui.js"></script>
 </body>
 </html>
