@@ -2,62 +2,55 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>KC LED Life Predict Core</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <title>KC-LED-LIFE-PREDICT-CORE</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
 
-<h1>KC-LED-LIFE-PREDICT-CORE</h1>
-<p class="subtitle">LM-80 data + TM-21 projection (engineering-grade)</p>
+  <!-- 🔹 模組標題（Frozen） -->
+  <header class="kc-header">
+    <h1>KC-LED-LIFE-PREDICT-CORE</h1>
+    <div class="subtitle">LM-80 + TM-21 (engineering-grade)</div>
+  </header>
 
-<section>
-  <h2>1. LM-80 Raw Data</h2>
-  <table id="dataTable">
-    <thead>
-      <tr>
-        <th>Time (hrs)</th>
-        <th>Flux or R</th>
-        <th>Is R?</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-  <button onclick="addRow()">Add Row</button>
-</section>
+  <!-- 🔹 結果層（Frozen Decision Plane） -->
+  <section class="kc-result-layer">
+    <div class="result-item status">Status: <span id="status">WAIT</span></div>
+    <div class="result-item">L70: <span id="l70">--</span> h</div>
+    <div class="result-item">Life Cap: <span id="cap">--</span> h</div>
+    <div class="result-item">Claim: <span id="claim">--</span></div>
 
-<section>
-  <h2>2. TM-21 Settings</h2>
-  <label>Sample Size:
-    <input type="number" id="sampleSize" value="20">
-  </label>
-  <label>Total Test Hours:
-    <input type="number" id="testHours" value="6000">
-  </label>
-  <label>Fit Mode:
-    <select id="fitMode">
-      <option value="LAST_5000H">LAST_5000H</option>
-      <option value="LAST_HALF">LAST_HALF</option>
-      <option value="MANUAL">MANUAL</option>
-    </select>
-  </label>
-</section>
+    <div class="result-actions">
+      <button onclick="exportJSON()">Export JSON</button>
+      <button onclick="exportText()">Generate Project Text</button>
+    </div>
+  </section>
 
-<section>
-  <h2>3. Result</h2>
-  <pre id="output">Press Calculate</pre>
-  <button onclick="calculate()">Calculate</button>
-</section>
-  
-<section>
-<button onclick="showProjectClaim()">
-  Generate Project Text
-</button>
-</section>
-  
-<pre id="claimText"></pre>
+  <!-- 🔹 輸入區（Scrollable） -->
+  <main class="kc-input-zone">
 
-  
-<script src="js/tm21-core.js"></script>
-<script src="js/ui.js"></script>
+    <section class="block">
+      <h2>1. LM-80 Raw Data</h2>
+      <!-- 你原本的 table / input 放這 -->
+    </section>
+
+    <section class="block">
+      <h2>2. TM-21 Settings</h2>
+      <!-- settings inputs -->
+    </section>
+
+    <section class="block">
+      <h2>3. Usage / Environment</h2>
+      <!-- usage profile -->
+    </section>
+
+    <section class="block">
+      <button onclick="calculate()">Calculate</button>
+    </section>
+
+  </main>
+
+  <script src="core.js"></script>
 </body>
 </html>
