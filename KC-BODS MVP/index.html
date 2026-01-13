@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>KC-BODS v0.1</title>
+</head>
+<body>
+
+<h2>KC-BODS :: BLU Optical Decision System</h2>
+
+<h3>LGP Structure</h3>
+<select id="structure">
+  <option value="dot">Dot / Random</option>
+  <option value="linear">Linear V-Cut</option>
+  <option value="directional">Directional / Rotated V-Cut</option>
+</select>
+
+<h3>V-Cut Angle</h3>
+<select id="angle">
+  <option value="bad">&lt;45° or &gt;55°</option>
+  <option value="good">45–55°</option>
+</select>
+
+<h3>BEF Count</h3>
+<select id="bef">
+  <option value="0">0</option>
+  <option value="1">1</option>
+  <option value="2">2</option>
+</select>
+
+<br><br>
+<button onclick="runBODS()">Run KC-BODS Verdict</button>
+
+<h3>Verdict</h3>
+<pre id="result"></pre>
+
+<script>
+function runBODS() {
+  const structure = document.getElementById("structure").value
+  const angle = document.getElementById("angle").value
+  const bef = parseInt(document.getElementById("bef").value)
+
+  let layer1 = (structure === "directional") ? "Class-C" : "Class-A/B"
+  let layer2 = (layer1 === "Class-C" && angle === "good")
+  let filmRole = (bef >= 2) ? "MAIN_FUNCTION" : "COMPENSATION_OR_TRIM"
+
+  let verdict = ""
+  let reason = ""
+
+  if (!layer2 && filmRole === "MAIN_FUNCTION") {
+    verdict = "❌ Film-Dependent Path"
+    reason = "LGP lacks directional control. BEF is acting as main function."
+  } else {
+    verdict = "✅ High-Efficiency Path"
+    reason = "Optical control primarily handled by LGP structure."
+  }
+
+  document.getElementById("result").innerText =
+    verdict + "\n\nReason:\n" + reason
+}
+</script>
+
+</body>
+</html>
