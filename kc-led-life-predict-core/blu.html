@@ -8,53 +8,9 @@
 <body>
 
 <h1>KC-SYS-LIFE-STACK</h1>
-<p class="subtitle">Display System Change Governance Kernel (KC-SYS-LIFE-STACK) </br>
-系統層變更治理核心，用於判斷變更是否可接受、可宣稱、可量產
-</p>
+<p class="subtitle">BLU → System lifetime governance</p>
 
 <section>
-    <h2>CASE Selection </h2>
-     <p>選擇對應的應用場景與系統基準（環境、法規、目標壽命）</p>
-  <label>Select Case:
-    <select id="caseSelect" onchange="loadCase()">
-      <option value="">-- Select CASE --</option>
-      <option value="CASE-AERO-001">CASE-AERO-001 (Aerospace)</option>
-      <option value="CASE-IND-001">CASE-IND-001 (Industrial)</option>
-      <option value="CASE-AUTO-001">CASE-AUTO-001 (Automotive)</option>
-    </select>
-  </label>
-   <p id="caseDesc" class="subtitle"></p>
-
-<section id="changeDeclare">
-  <h2>Change Declaration (Kernel Mode)</h2>
-  <label>Change Type:
-    <select id="changeType">
-      <option value="">-- Declare Change --</option>
-      <option value="BRIGHTNESS_UP">Brightness Increase</option>
-      <option value="TEMP_ENV">Environment Temperature Change</option>
-      <option value="USAGE_PROFILE">Usage Profile Change</option>
-    </select>
-  </label>
-
-  <label>Change Target:
-    <select id="changeTarget">
-      <option value="">-- Target --</option>
-      <option value="LED_CURRENT">LED Current</option>
-      <option value="POWER">BLU Power</option>
-      <option value="USAGE">Usage Pattern</option>
-    </select>
-  </label>
-
-  <button type="button" onclick="evaluateChange()">Evaluate Change</button>
-  <pre id="boundaryResult">Not Evaluated</pre>
-</section>
-
-<section id="boundaryGate">
-  <h2>Boundary & PF-change Decision</h2>
-  <pre id="pfDecision">Not Evaluated</pre>
-</section>
-
-  
   <h2>System Usage Profile</h2>
 
   <label>Duty cycle (0~1):
@@ -74,48 +30,13 @@
     </select>
   </label>
 
-  <button type="button" onclick="requestDecision()">Request System Decision</button>
-
+  <button onclick="runSystem()">Calculate System Life</button>
 </section>
 
 <section>
-  <h2>System Verdict (KC-K2-BLU-LIFE)</h2>
-  <pre id="sysVerdict">No decision yet.</pre>
-</section>
-
-<section>
-  <h2>Kernel Output (Read-only)</h2>
+  <h2>Result</h2>
   <pre id="sysOutput"></pre>
 </section>
-  
-<p>
---------------------------------------</br>
-Change Declaration（Kernel Mode）</br>
-Change Type</br>
-宣告本次變更的性質（亮度、功率、結構、材料等）</br>
-Change Target</br>
-指定變更影響的核心對象（LED、BLU、Driver、Mechanical）</br>
-Evaluate Change</br>
-將變更送入 Boundary / PF-change Kernel 進行分類</br>
-Boundary & PF-change Decision</br>
-顯示 Kernel 對本次變更的邊界判定結果</br>
-Boundary：B1 ~ B5（設計 / 系統 / 架構等級）</br>
-PF-change：S / M / L（物理風險等級）</br>
-System Usage Profile</br>
-Duty cycle (0~1)</br>
-系統實際運作時間比例（使用率）</br>
-Brightness ratio</br>
-相對於設計亮度的實際操作亮度比例</br>
-Environment</br>
-使用環境（影響老化速率與安全係數）</br>
-Request System Decision</br>
-將使用條件送入系統壽命 Kernel 進行最終判斷</br>
-System Verdict（KC-K2-BLU-LIFE）</br>
-系統層壽命與風險的最終裁決結果</br>
-PASS / FAIL</br>
-是否允許專案使用</br>
-是否允許對外宣稱</br>
-</p>
 
 <script src="js/blu-transfer.js"></script>
 <script src="js/sys-life-stack.js"></script>
