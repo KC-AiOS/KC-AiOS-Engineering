@@ -2,125 +2,53 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>KC-LED-LIFE-PREDICT-CORE</title>
+  <title>KC LED Life Predict Core</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
 
-  <!-- Frozen Header -->
-  <header class="kc-header">
-    <div class="kc-title">KC-LED-LIFE-PREDICT-CORE</div>
-    <div class="kc-subtitle">LM-80 + TM-21 (engineering-grade)</div>
-  </header>
+<h1>KC-LED-LIFE-PREDICT-CORE</h1>
+<p class="subtitle">LM-80 data + TM-21 projection (engineering-grade)</p>
 
-  <!-- Frozen Result Layer -->
-  <section class="kc-result" data-kc="result-bar">
-    <div class="kc-kv">
-      <span class="k">Status</span>
-      <span class="v" data-kc="status">WAIT</span>
-    </div>
-    <div class="kc-kv">
-      <span class="k">L70</span>
-      <span class="v"><span data-kc="l70">--</span> h</span>
-    </div>
-    <div class="kc-kv">
-      <span class="k">Life Cap</span>
-      <span class="v"><span data-kc="cap">--</span> h</span>
-    </div>
-    <div class="kc-kv">
-      <span class="k">Claim</span>
-      <span class="v" data-kc="claim">--</span>
-    </div>
+<section>
+  <h2>1. LM-80 Raw Data</h2>
+  <table id="dataTable">
+    <thead>
+      <tr>
+        <th>Time (hrs)</th>
+        <th>Flux or R</th>
+        <th>Is R?</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <button onclick="addRow()">Add Row</button>
+</section>
 
-    <div class="kc-actions">
-      <button data-kc="btn-export-json">Export JSON</button>
-      <button data-kc="btn-export-text">Generate Project Text</button>
-      <button data-kc="btn-calc" class="primary">Calculate</button>
-    </div>
-  </section>
+<section>
+  <h2>2. TM-21 Settings</h2>
+  <label>Sample Size:
+    <input type="number" id="sampleSize" value="20">
+  </label>
+  <label>Total Test Hours:
+    <input type="number" id="testHours" value="6000">
+  </label>
+  <label>Fit Mode:
+    <select id="fitMode">
+      <option value="LAST_5000H">LAST_5000H</option>
+      <option value="LAST_HALF">LAST_HALF</option>
+      <option value="MANUAL">MANUAL</option>
+    </select>
+  </label>
+</section>
 
-  <!-- Scroll Area -->
-  <main class="kc-main">
+<section>
+  <h2>3. Result</h2>
+  <pre id="output">Press Calculate</pre>
+  <button onclick="calculate()">Calculate</button>
+</section>
 
-    <!-- 1) LM-80 -->
-    <section class="kc-block">
-      <h2>1. LM-80 Raw Data</h2>
-
-      <table class="kc-table">
-        <thead>
-          <tr>
-            <th>Time (hrs)</th>
-            <th>Flux or R</th>
-            <th>Is R?</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody data-kc="lm80-body"></tbody>
-      </table>
-
-      <div class="kc-row-actions">
-        <button data-kc="btn-add-row">Add Row</button>
-        <button data-kc="btn-seed">Seed Example</button>
-      </div>
-    </section>
-
-    <!-- 2) TM-21 -->
-    <section class="kc-block">
-      <h2>2. TM-21 Settings</h2>
-
-      <div class="kc-form">
-        <label>Sample Size
-          <input type="number" data-kc="sample-size" value="20" min="1">
-        </label>
-
-        <label>Total Test Hours
-          <input type="number" data-kc="test-hours" value="6000" min="1">
-        </label>
-
-        <label>Fit Mode
-          <select data-kc="fit-mode">
-            <option value="LAST_5000H" selected>LAST_5000H</option>
-            <option value="LAST_HALF">LAST_HALF</option>
-            <option value="MANUAL">MANUAL</option>
-          </select>
-        </label>
-      </div>
-    </section>
-
-    <!-- 3) Usage / Environment -->
-    <section class="kc-block">
-      <h2>3. Usage / Environment</h2>
-
-      <div class="kc-form">
-        <label>Duty cycle (0~1)
-          <input type="number" step="0.01" min="0" max="1" data-kc="duty" value="0.56">
-        </label>
-
-        <label>Brightness ratio (0~1)
-          <input type="number" step="0.01" min="0" max="1" data-kc="brightness" value="0.76">
-        </label>
-
-        <label>Environment
-          <select data-kc="env">
-            <option value="INDUSTRIAL" selected>Industrial</option>
-            <option value="AUTOMOTIVE">Automotive</option>
-            <option value="AEROSPACE">Aerospace</option>
-          </select>
-        </label>
-      </div>
-    </section>
-
-    <!-- Debug Output -->
-    <section class="kc-block">
-      <h2>Debug Output</h2>
-      <pre class="kc-pre" data-kc="output">{ "hint": "Press Calculate" }</pre>
-    </section>
-
-  </main>
-
-  <!-- Core + App -->
-  <script src="js/tm21-core.js"></script>
-  <script src="js/app.js"></script>
+<script src="js/tm21-core.js"></script>
+<script src="js/ui.js"></script>
 </body>
 </html>
