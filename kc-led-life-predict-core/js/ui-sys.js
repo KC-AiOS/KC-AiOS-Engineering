@@ -1,18 +1,32 @@
+function loadCase() {
+  const caseId = document.getElementById("caseSelect").value;
+  if (!caseId) return;
+
+  const c = CASE_LIBRARY[caseId];
+  document.getElementById("caseDesc").textContent =
+    "Loaded: " + c.name;
+
+  // 套用 usage profile 到 UI
+  document.getElementById("duty").value = c.usage.dutyCycle;
+  document.getElementById("brightness").value = c.usage.brightnessRatio;
+  document.getElementById("env").value = c.usage.environment;
+
+  // 暫存給 runSystem 用
+  window._caseBlu = c.blu;
+}
+
 function runSystem() {
 
-  // mock TM-21 result (之後可由 index.html 傳入)
+  // LED core（之後可接 index.html）
   const ledResult = {
     valid: true,
     alpha: 1.2e-5
   };
 
-  const bluResult = computeBLULife(ledResult, {
-    K_temp: 2.0,
-    K_current: 1.3,
-    alpha_optical: 4e-6,
-    lifeConfidence: "HIGH",
-    lifeClaimStatus: "ALLOWED"
-  });
+  const bluResult = computeBLULife(
+    ledResult,
+    window._caseBlu || {}
+  );
 
   const usage = {
     dutyCycle: Number(document.getElementById("duty").value),
