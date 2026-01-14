@@ -96,30 +96,67 @@
 </footer>
 
 <script>
-async function loadData() {
-  // 👉 這裡只要換檔名就能看不同日期
-  const today = "2026-01-14";
-  const url = `./data/${today}.json`;
+const today = "2026-01-14";
+const yesterday = "2026-01-13";
 
+async function loadJSON(date) {
   try {
-    const res = await fetch(url);
-    const data = await res.json();
-
-    renderMeta(data);
-    renderTable(data.items);
-  } catch (err) {
-    document.getElementById("content").innerText =
-      "❌ 無法載入資料，請確認 JSON 是否存在";
+    const res = await fetch(`./data/${date}.json`);
+    return await res.json();
+  } catch {
+    return null;
   }
 }
 
-function renderMeta(data) {
-  const meta = document.getElementById("meta");
-  meta.innerText =
-    `日期：${data.date} ｜ 筆數：${data.count} ｜ Source：${data.source}`;
+function buildYesterdayMap(yesterdayItems) {
+  const map = {};
+  if (!yesterdayItems) return map;
+
+  yesterdayItems.forEach(item => {
+    map[item.code] = item.rank;
+  });
+  return map;
 }
 
-function renderTable(items) {
+function calcDelta(todayItem, yesterdayMap) {
+  const yRank = yesterdayMap[todayItem.code];
+
+  if (yRank === undefined) {
+    return { label: "🆕 新進榜", cls: "delta-new" };
+  }
+
+  if (yRank > todayItem.rank) {
+    return { label: `⬆ +${yRank - todayItem.rank}`, cls: "delta-up" };
+  }
+
+  if (yRank < todayItem.rank) {
+    return { label: `⬇ -${todayItem.rank - yRank}`, cls: "delta-down" };
+  }
+
+  return { label: "⏸", cls: "delta-same" };
+}
+
+async function run() {
+  const todayData = await loadJSON(today);
+  const yesterdayData = await loadJSON(yesterday);
+
+  renderMeta(todayData, yesterdayData);
+
+  const yesterdayMap = buildYesterdayMap(
+    yesterdayData ? yesterdayData.items : null
+  );
+
+  renderTable(todayData.items, yesterdayMap);
+}
+
+function renderMeta(todayData, yesterdayData) {
+  const meta = document.getElementById("meta");
+  meta.innerText =
+    `日期：${todayData.date} ｜ 筆數：${todayData.count}` +
+    (yesterdayData ? " ｜ 已載入昨日資料" : " ｜ ⚠ 無昨日資料");
+}
+
+function renderTable(items, yesterdayMap) {
   const container = document.getElementById("content");
 
   let html = `
@@ -127,6 +164,7 @@ function renderTable(items) {
       <thead>
         <tr>
           <th>Rank</th>
+          <th>變化</th>
           <th>代碼</th>
           <th>名稱</th>
           <th>收盤價</th>
@@ -137,11 +175,13 @@ function renderTable(items) {
   `;
 
   items.forEach(item => {
+    const delta = calcDelta(item, yesterdayMap);
     const cls = item.changePct >= 0 ? "up" : "down";
 
     html += `
       <tr>
         <td>${item.rank}</td>
+        <td class="${delta.cls}">${delta.label}</td>
         <td>${item.code}</td>
         <td>${item.name}</td>
         <td>${item.close.toFixed(2)}</td>
@@ -158,8 +198,10 @@ function renderTable(items) {
   container.innerHTML = html;
 }
 
-loadData();
+run();
 </script>
+
+
 
 </body>
 </html>
