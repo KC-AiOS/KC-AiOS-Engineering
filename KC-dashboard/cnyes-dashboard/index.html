@@ -140,12 +140,31 @@ async function run() {
   const todayData = await loadJSON(today);
 
   if (!todayData) {
-    document.getElementById("meta").innerText =
-      "⚠ 尚未產生資料（請確認 latest.json 是否存在）";
-    document.getElementById("content").innerText =
-      "No data available.";
     return;
   }
+
+  // （1）Momentum 計算
+  for (const item of todayData.items) {
+    item.momentum = await calcMomentum(item.code, historyDates);
+  }
+
+  // 🔽【就在這裡，加 Composite Score】🔽
+  for (const item of todayData.items) {
+    item.composite = Number(
+      (item.changePct * item.momentum).toFixed(2)
+    );
+  }
+
+  // 🔽【接著立刻用 Composite 排序】🔽
+  todayData.items.sort((a, b) => b.composite - a.composite);
+
+  // （2）renderMeta
+  renderMeta(todayData, null);
+
+  // （3）renderTable
+  renderTable(todayData.items, diffItems(todayData, null));
+}
+
 
   let yesterdayData = null;
   if (yesterday) {
