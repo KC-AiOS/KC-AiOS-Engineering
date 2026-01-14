@@ -1,0 +1,42 @@
+{
+  "source": "cnyes_ranking",
+  "date": "2026-01-14",
+  "count": 5,
+  "items": [
+    {
+      "rank": 1,
+      "code": "2330",
+      "name": "台積電",
+      "close": 640.00,
+      "changePct": 4.85
+    },
+    {
+      "rank": 2,
+      "code": "2454",
+      "name": "聯發科",
+      "close": 1185.00,
+      "changePct": 3.92
+    },
+    {
+      "rank": 3,
+      "code": "2317",
+      "name": "鴻海",
+      "close": 104.50,
+      "changePct": 2.45
+    },
+    {
+      "rank": 4,
+      "code": "2603",
+      "name": "長榮",
+      "close": 168.00,
+      "changePct": 6.18
+    },
+    {
+      "rank": 5,
+      "code": "2881",
+      "name": "富邦金",
+      "close": 72.30,
+      "changePct": 1.86
+    }
+  ]
+}
