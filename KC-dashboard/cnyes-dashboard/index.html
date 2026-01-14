@@ -147,17 +147,15 @@ async function run() {
     return;
   }
 
-  renderMeta(todayData, null);
-  renderTable(todayData.items, {});
+  let yesterdayData = null;
+  if (yesterday) {
+    yesterdayData = await loadJSON(yesterday);
+  }
+
+  renderMeta(todayData, yesterdayData);
+  renderTable(todayData.items, diffItems(todayData, yesterdayData));
 }
 
-
-function renderMeta(todayData, yesterdayData) {
-  const meta = document.getElementById("meta");
-  meta.innerText =
-    `日期：${todayData.date} ｜ 筆數：${todayData.count}` +
-    (yesterdayData ? " ｜ 已載入昨日資料" : " ｜ ⚠ 無昨日資料");
-}
 
 function renderTable(items, yesterdayMap) {
   const container = document.getElementById("content");
