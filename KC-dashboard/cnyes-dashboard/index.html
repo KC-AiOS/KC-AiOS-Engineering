@@ -156,6 +156,25 @@ async function run() {
   renderTable(todayData.items, diffItems(todayData, yesterdayData));
 }
 
+ function renderMeta(todayData, yesterdayData) {
+  const meta = document.getElementById("meta");
+
+  if (!todayData) {
+    meta.innerText = "⚠ 無資料";
+    return;
+  }
+
+  const date = todayData.date || "N/A";
+  const count = todayData.count || todayData.items.length;
+
+  let note = "";
+  if (!yesterdayData) {
+    note = "｜無昨日資料";
+  }
+
+  meta.innerText = `日期：${date} ｜ 筆數：${count} ${note}`;
+}
+ 
 
 function renderTable(items, yesterdayMap) {
   const container = document.getElementById("content");
