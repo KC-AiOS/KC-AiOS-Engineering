@@ -101,7 +101,7 @@ const yesterday = null; // 先關閉昨日比對
 
 async function loadJSON(date) {
   try {
-    const res = await fetch(`./data/${date}.json`);
+    const res = await fetch(`./data/${today}.json`);
     return await res.json();
   } catch {
     return null;
@@ -138,16 +138,19 @@ function calcDelta(todayItem, yesterdayMap) {
 
 async function run() {
   const todayData = await loadJSON(today);
-  const yesterdayData = await loadJSON(yesterday);
 
-  renderMeta(todayData, yesterdayData);
+  if (!todayData) {
+    document.getElementById("meta").innerText =
+      "⚠ 尚未產生資料（請確認 latest.json 是否存在）";
+    document.getElementById("content").innerText =
+      "No data available.";
+    return;
+  }
 
-  const yesterdayMap = buildYesterdayMap(
-    yesterdayData ? yesterdayData.items : null
-  );
-
-  renderTable(todayData.items, yesterdayMap);
+  renderMeta(todayData, null);
+  renderTable(todayData.items, {});
 }
+
 
 function renderMeta(todayData, yesterdayData) {
   const meta = document.getElementById("meta");
