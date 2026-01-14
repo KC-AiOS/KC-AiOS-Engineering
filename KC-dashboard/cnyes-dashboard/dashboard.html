@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <title>KC-WebTrace｜台股排行 Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont;
+      margin: 0;
+      padding: 20px;
+      background: #f5f7fa;
+    }
+
+    h1 {
+      margin-bottom: 6px;
+    }
+
+    .meta {
+      color: #666;
+      margin-bottom: 16px;
+      font-size: 14px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #eee;
+      text-align: right;
+      font-size: 14px;
+    }
+
+    th {
+      background: #f0f2f5;
+      color: #333;
+    }
+
+    th:first-child,
+    td:first-child {
+      text-align: center;
+      width: 60px;
+    }
+
+    th:nth-child(2),
+    td:nth-child(2),
+    th:nth-child(3),
+    td:nth-child(3) {
+      text-align: left;
+    }
+
+    .up {
+      color: #c0392b;
+      font-weight: 600;
+    }
+
+    .down {
+      color: #27ae60;
+      font-weight: 600;
+    }
+
+    .loading {
+      padding: 20px;
+      color: #999;
+    }
+
+    footer {
+      margin-top: 20px;
+      font-size: 12px;
+      color: #999;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>📈 台股漲幅排行 Dashboard</h1>
+<div class="meta" id="meta">載入中…</div>
+
+<div id="content" class="loading">Loading data…</div>
+
+<footer>
+  資料來源：鉅亨網｜本頁為觀測用途，不構成投資建議
+</footer>
+
+<script>
+async function loadData() {
+  // 👉 這裡只要換檔名就能看不同日期
+  const today = "2026-01-14";
+  const url = `./data/${today}.json`;
+
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+
+    renderMeta(data);
+    renderTable(data.items);
+  } catch (err) {
+    document.getElementById("content").innerText =
+      "❌ 無法載入資料，請確認 JSON 是否存在";
+  }
+}
+
+function renderMeta(data) {
+  const meta = document.getElementById("meta");
+  meta.innerText =
+    `日期：${data.date} ｜ 筆數：${data.count} ｜ Source：${data.source}`;
+}
+
+function renderTable(items) {
+  const container = document.getElementById("content");
+
+  let html = `
+    <table>
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>代碼</th>
+          <th>名稱</th>
+          <th>收盤價</th>
+          <th>漲跌幅 (%)</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
+  items.forEach(item => {
+    const cls = item.changePct >= 0 ? "up" : "down";
+
+    html += `
+      <tr>
+        <td>${item.rank}</td>
+        <td>${item.code}</td>
+        <td>${item.name}</td>
+        <td>${item.close.toFixed(2)}</td>
+        <td class="${cls}">${item.changePct.toFixed(2)}</td>
+      </tr>
+    `;
+  });
+
+  html += `
+      </tbody>
+    </table>
+  `;
+
+  container.innerHTML = html;
+}
+
+loadData();
+</script>
+
+</body>
+</html>
