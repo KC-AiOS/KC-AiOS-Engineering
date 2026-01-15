@@ -191,16 +191,19 @@ function renderTable(items, yesterdayMap) {
 }
 
 /* ====== Main ====== */
+
 async function run() {
   console.log("KC AiOS: run() start");
 
-  const todayData = await loadJSON();
-
-  // ✅ 如果載不到，直接在畫面顯示錯誤，不要卡 Loading
-  const container = document.getElementById("content");
-  if (!todayData || !todayData.items) {
-    if (container) container.innerText = "無法載入資料：請確認 data/latest.json 是否存在且可讀取。";
-    console.error("todayData invalid:", todayData);
+  let todayData;
+  try {
+    todayData = await loadTodayData(); // ✅ 正確
+  } catch (err) {
+    const container = document.getElementById("content");
+    if (container) {
+      container.innerText = "無法載入資料：請確認 data/latest.json 是否存在且可讀取。";
+    }
+    console.error(err);
     return;
   }
 
