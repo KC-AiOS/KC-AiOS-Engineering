@@ -194,7 +194,7 @@ function renderTable(items, yesterdayMap) {
 async function run() {
   console.log("KC AiOS: run() start");
 
-  const todayData = await loadJSON(today);
+  const todayData = await loadJSON();
 
   // ✅ 如果載不到，直接在畫面顯示錯誤，不要卡 Loading
   const container = document.getElementById("content");
