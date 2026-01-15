@@ -19,12 +19,15 @@ jobs:
           TODAY=$(date -u +"%Y-%m-%d")
           echo "Today: $TODAY"
 
+          mkdir -p data
+
           if [ ! -f data/latest.json ]; then
-            echo "❌ data/latest.json 不存在"
-            exit 1
+             echo '{"date":"init","items":[]}' > data/latest.json
           fi
 
           cp data/latest.json data/$TODAY.json
+
+
 
           # 強制修正 date 欄位（如果有）
           jq --arg d "$TODAY" '.date=$d' data/$TODAY.json > /tmp/tmp.json || cp data/$TODAY.json /tmp/tmp.json
