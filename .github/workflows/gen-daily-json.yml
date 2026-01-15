@@ -21,10 +21,10 @@ jobs:
 
           mkdir -p data
 
-          if [ ! -f data/latest.json ]; then
-             echo '{"date":"init","items":[]}' > data/latest.json
+          if [ ! -f cnyes-dashboard/data/latest.json ]; then
+           echo "❌ cnyes-dashboard/data/latest.json 不存在"
+           exit 1
           fi
-
           cp data/latest.json data/$TODAY.json
 
 
