@@ -145,10 +145,14 @@ async function loadJSON(date) {
 
 
 async function loadTodayData() {
+  const today = new Date().toISOString().slice(0, 10);
+  
   let data = await loadJSON(today);
   if (data) return data;
+
   return await loadJSON("latest");
 }
+
 
 async function loadYesterdayData() {
   return await loadJSON("yesterday");
