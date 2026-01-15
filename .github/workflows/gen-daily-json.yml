@@ -1,0 +1,39 @@
+name: Generate Daily Stock JSON
+
+on:
+  schedule:
+    # 每天台灣時間 18:00（UTC 10:00）
+    - cron: "0 10 * * *"
+  workflow_dispatch: {}   # 手動執行用（重要）
+
+jobs:
+  gen-json:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Generate today json
+        run: |
+          TODAY=$(date -u +"%Y-%m-%d")
+          echo "Today: $TODAY"
+
+          if [ ! -f data/latest.json ]; then
+            echo "❌ data/latest.json 不存在"
+            exit 1
+          fi
+
+          cp data/latest.json data/$TODAY.json
+
+          # 強制修正 date 欄位（如果有）
+          jq --arg d "$TODAY" '.date=$d' data/$TODAY.json > /tmp/tmp.json || cp data/$TODAY.json /tmp/tmp.json
+          mv /tmp/tmp.json data/$TODAY.json
+
+      - name: Commit & push
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add data/*.json
+          git commit -m "auto: generate daily json $(date -u +"%Y-%m-%d")" || echo "Nothing to commit"
+          git push
