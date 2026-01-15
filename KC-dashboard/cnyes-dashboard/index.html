@@ -250,11 +250,10 @@ function diffItems(todayData, yesterdayData) {
 </script>
 
 <script type="module">
-  const BUILD_ID = "2026-01-14-01"; // ← 每次更新改這行
-
+  const BUILD_ID = "2026-01-14-01";
   console.log("KC Dashboard build:", BUILD_ID);
 
-  run();
+  window.run(); // ← 明確呼叫
 </script>
 
 </body>
