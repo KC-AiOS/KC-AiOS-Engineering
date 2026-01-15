@@ -120,6 +120,21 @@ async function loadJSON(date) {
   }
 }
 
+async function loadTodayData() {
+  const today = new Date().toISOString().slice(0, 10);
+
+  // 1️⃣ 先嘗試今天
+  let data = await loadJSON(today);
+  if (data) return data;
+
+  // 2️⃣ fallback：latest
+  data = await loadJSON("latest");
+  if (data) return data;
+
+  // 3️⃣ 都沒有才是真的錯
+  throw new Error("No data available (today & latest missing)");
+}
+
 function calcDelta(todayItem, yesterdayMap) {
   const yRank = yesterdayMap[todayItem.code];
   if (yRank === undefined) return { label: "🆕 新進榜", cls: "delta-new" };
