@@ -85,6 +85,22 @@
   .delta-up { color: #c0392b; font-weight: 600; }
   .delta-down { color: #27ae60; font-weight: 600; }
   .delta-same { color: #7f8c8d; }
+    
+    .range-btn {
+  padding: 6px 12px;
+  margin-right: 6px;
+  border: none;
+  border-radius: 4px;
+  background: #dfe6e9;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.range-btn.active {
+  background: #0984e3;
+  color: white;
+  font-weight: 600;
+}
   </style>
 </head>
 
@@ -94,6 +110,12 @@
 <div class="meta" id="meta">載入中…</div>
 
 <div id="content" class="loading">Loading data…</div>
+  <div id="range-selector" style="margin-bottom: 12px;">
+  <button data-range="50" class="range-btn active">Top 50</button>
+  <button data-range="100" class="range-btn">Top 100</button>
+  <button data-range="200" class="range-btn">Top 200</button>
+</div>
+
 
 <footer>
   資料來源：鉅亨網｜本頁為觀測用途，不構成投資建議
