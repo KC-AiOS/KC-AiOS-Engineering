@@ -135,8 +135,11 @@ let GLOBAL_currentRange = 50;
 /* ====== Helpers ====== */
 async function loadJSON(date) {
   try {
-    const url = `./data/${date}.json?t=${Date.now()}`;
+    const url =
+      `/KC-AiOS-Engineering/KC-dashboard/cnyes-dashboard/data/${date}.json?t=${Date.now()}`;
+
     const res = await fetch(url, { cache: "no-store" });
+
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return await res.json();
   } catch (err) {
@@ -144,6 +147,7 @@ async function loadJSON(date) {
     return null;
   }
 }
+
 
 async function loadTodayData() {
   const today = new Date().toISOString().slice(0, 10);
