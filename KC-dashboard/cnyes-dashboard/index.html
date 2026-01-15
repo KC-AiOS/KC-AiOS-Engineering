@@ -128,31 +128,39 @@ let GLOBAL_yesterdayMap = {};
 let GLOBAL_currentRange = 50;
 
 /* ====== Helpers ====== */
-async function loadJSON(date) {
+
+  async function loadJSON(date) {
   try {
-    const url =
-      `/KC-AiOS-Engineering/KC-dashboard/cnyes-dashboard/data/${date}.json?t=${Date.now()}`;
+    // 改用相對路徑 ./data/ 避免子目錄網址解析錯誤
+    const url = `./data/${date}.json?t=${Date.now()}`;
 
     const res = await fetch(url, { cache: "no-store" });
 
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (!res.ok) {
+      console.warn(`檔案 ${date}.json 不存在 (HTTP ${res.status})`);
+      return null;
+    }
     return await res.json();
   } catch (err) {
-    console.error("載入 JSON 失敗:", err);
+    console.error("網路請求異常:", err);
     return null;
   }
 }
 
-
 async function loadTodayData() {
-  const today = new Date().toISOString().slice(0, 10);
+  // 優先嘗試讀取最新資料標籤，這通常是最穩定的入口
+  let data = await loadJSON("latest");
   
-  let data = await loadJSON(today);
-  if (data) return data;
+  if (data) {
+    console.log("成功載入 latest.json");
+    return data;
+  }
 
-  return await loadJSON("latest");
+  // 如果 latest 失敗，才嘗試抓取當天日期
+  const today = new Date().toISOString().slice(0, 10);
+  console.log(`嘗試抓取當日檔案: ${today}`);
+  return await loadJSON(today);
 }
-
 
 async function loadYesterdayData() {
   return await loadJSON("yesterday");
