@@ -1,0 +1,7 @@
+{
+  "date": "2026-01-14",
+  "items": [
+    { "rank": 1, "code": "2330", "name": "台積電", "close": 650, "changePct": 1.2 },
+    { "rank": 2, "code": "2317", "name": "鴻海", "close": 120, "changePct": -0.5 }
+  ]
+}
