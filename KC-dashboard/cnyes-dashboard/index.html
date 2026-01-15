@@ -250,22 +250,21 @@ function diffItems(todayData, yesterdayData) {
 </script>
 
 <script type="module">
-    // 加上這行來強制讓手機瀏覽器不使用快取（針對開發階段）
-    const version = new Date().getTime(); 
-    
-    // 檢查 run 函數是否存在
-    if (typeof run === 'function') {
-        console.log("KC AiOS: 啟動 run()");
-        run();
+    const BUILD_ID = "2026-01-15-fix"; // 更新 ID 確保快取刷新
+    console.log("KC Dashboard build:", BUILD_ID);
+
+    // 檢查全域是否有 run 函數
+    if (typeof window.run === 'function') {
+        window.run();
     } else {
-        // 如果 run 定義在其他 module，嘗試從 window 找
-        if (window.run) {
-            window.run();
-        } else {
-            document.body.innerHTML += '<p style="color:red; position:fixed; top:0;">Error: 找不到 run 函數</p>';
-        }
+        // 如果還是找不到，嘗試延遲 500ms 執行（有時是載入順序問題）
+        setTimeout(() => {
+            if (window.run) window.run();
+            else document.body.insertAdjacentHTML('afterbegin', '<p style="color:red">啟動失敗：核心組件未就緒</p>');
+        }, 500);
     }
 </script>
+
 
 </body>
 </html>
