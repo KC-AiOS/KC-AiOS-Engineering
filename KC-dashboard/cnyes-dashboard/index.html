@@ -109,9 +109,8 @@ const yesterday = null;
 /* ====== Helpers ====== */
 async function loadJSON(date) {
   try {
-    // ✅ 這裡要用 date，不要硬寫 today
     const url = `./data/${date}.json?t=${Date.now()}`;
-    const res = await fetch(url, { cache: "no-store" }); // ✅ iOS更穩
+    const res = await fetch(url, { cache: "no-store" });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return await res.json();
   } catch (err) {
@@ -123,18 +122,21 @@ async function loadJSON(date) {
 async function loadTodayData() {
   const today = new Date().toISOString().slice(0, 10);
 
-  // 1️⃣ 先嘗試今天
   let data = await loadJSON(today);
   if (data) return data;
 
-  // 2️⃣ fallback：latest
   data = await loadJSON("latest");
   if (data) return data;
 
-  // 3️⃣ 都沒有才是真的錯
   throw new Error("No data available (today & latest missing)");
 }
 
+async function loadYesterdayData() {
+  let data = await loadJSON("yesterday"); // 對應 data/yesterday.json
+  return data; // 可能為 null，沒關係
+}
+
+/* 排名變化邏輯 */
 function calcDelta(todayItem, yesterdayMap) {
   const yRank = yesterdayMap[todayItem.code];
   if (yRank === undefined) return { label: "🆕 新進榜", cls: "delta-new" };
@@ -151,9 +153,12 @@ function renderMeta(todayData, yesterdayData) {
     meta.innerText = "⚠ 無資料";
     return;
   }
+
   const date = todayData.date || "N/A";
   const count = Array.isArray(todayData.items) ? todayData.items.length : 0;
-  meta.innerText = `日期：${date} ｜ 筆數：${count} ${!yesterdayData ? "｜無昨日資料" : ""}`;
+  const y = yesterdayData ? yesterdayData.date : "無";
+
+  meta.innerText = `日期：${date} ｜ 筆數：${count} ｜ 昨日：${y}`;
 }
 
 function renderTable(items, yesterdayMap) {
@@ -191,25 +196,31 @@ function renderTable(items, yesterdayMap) {
 }
 
 /* ====== Main ====== */
-
 async function run() {
   console.log("KC AiOS: run() start");
 
-  let todayData;
-  try {
-    todayData = await loadTodayData(); // ✅ 正確
-  } catch (err) {
-    const container = document.getElementById("content");
-    if (container) {
-      container.innerText = "無法載入資料：請確認 data/latest.json 是否存在且可讀取。";
-    }
-    console.error(err);
+  const todayData = await loadTodayData();
+  const yData = await loadYesterdayData();
+
+  // 建立昨天 rank map（code → rank）
+  let yMap = {};
+  if (yData && Array.isArray(yData.items)) {
+    yData.items.forEach(item => {
+      yMap[item.code] = item.rank;
+    });
+  }
+
+  const container = document.getElementById("content");
+  if (!todayData || !todayData.items) {
+    if (container) container.innerText = "無法載入資料：請確認 data/latest.json 是否存在且可讀取。";
+    console.error("todayData invalid:", todayData);
     return;
   }
 
-  renderMeta(todayData, null);
-  renderTable(todayData.items, {});
+  renderMeta(todayData, yData);
+  renderTable(todayData.items, yMap);
 }
+
 
 window.run = run;
 
