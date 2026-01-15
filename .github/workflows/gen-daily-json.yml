@@ -16,16 +16,20 @@ jobs:
 
       - name: Generate today json
         run: |
-          TODAY=$(date -u +"%Y-%m-%d")
-          echo "Today: $TODAY"
+        TODAY=$(date -u +"%Y-%m-%d")
+        echo "Today: $TODAY"
 
-          mkdir -p data
+        # 確保目標資料夾存在
+        mkdir -p cnyes-dashboard/data
 
-          if [ ! -f cnyes-dashboard/data/latest.json ]; then
-           echo "❌ cnyes-dashboard/data/latest.json 不存在"
-           exit 1
-          fi
-          cp data/latest.json data/$TODAY.json
+        # 檢查 latest.json（正確路徑）
+        if [ ! -f cnyes-dashboard/data/latest.json ]; then
+         echo "❌ cnyes-dashboard/data/latest.json 不存在"
+         exit 1
+        fi
+
+        # 複製成今日檔
+        cp cnyes-dashboard/data/latest.json cnyes-dashboard/data/$TODAY.json
 
 
 
