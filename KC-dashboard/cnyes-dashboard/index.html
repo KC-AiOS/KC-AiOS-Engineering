@@ -129,20 +129,19 @@ let GLOBAL_currentRange = 50;
 
 /* ====== Helpers ====== */
 
-  async function loadJSON(date) {
+async function loadJSON(date) {
   try {
-    // 改用相對路徑 ./data/ 避免子目錄網址解析錯誤
-    const url = `./data/${date}.json?t=${Date.now()}`;
-
+    const url = `./data/${date}.json?t=${Date.now()}`; // 建議改用相對路徑
     const res = await fetch(url, { cache: "no-store" });
 
+    // 關鍵修正：如果 404，不拋出錯誤，而是回傳 null
     if (!res.ok) {
-      console.warn(`檔案 ${date}.json 不存在 (HTTP ${res.status})`);
-      return null;
+      console.warn(`[KC AiOS] 檔案 ${date}.json 不存在`);
+      return null; 
     }
     return await res.json();
   } catch (err) {
-    console.error("網路請求異常:", err);
+    console.error("載入 JSON 失敗:", err);
     return null;
   }
 }
