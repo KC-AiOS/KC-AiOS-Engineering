@@ -100,171 +100,109 @@
 </footer>
 
 <script>
+/* ====== Core Config ====== */
 const today = "latest";
-const yesterday = null; // 先關閉昨日比對
+const yesterday = null;
 
+/* ====== Helpers ====== */
 async function loadJSON(date) {
   try {
-    const res = await fetch(`./data/${today}.json`);
+    // ✅ 這裡要用 date，不要硬寫 today
+    const url = `./data/${date}.json?t=${Date.now()}`;
+    const res = await fetch(url, { cache: "no-store" }); // ✅ iOS更穩
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return await res.json();
-  } catch {
+  } catch (err) {
+    console.error("載入 JSON 失敗:", err);
     return null;
   }
 }
 
-function buildYesterdayMap(yesterdayItems) {
-  const map = {};
-  if (!yesterdayItems) return map;
-
-  yesterdayItems.forEach(item => {
-    map[item.code] = item.rank;
-  });
-  return map;
-}
-
 function calcDelta(todayItem, yesterdayMap) {
   const yRank = yesterdayMap[todayItem.code];
-
-  if (yRank === undefined) {
-    return { label: "🆕 新進榜", cls: "delta-new" };
-  }
-
-  if (yRank > todayItem.rank) {
-    return { label: `⬆ +${yRank - todayItem.rank}`, cls: "delta-up" };
-  }
-
-  if (yRank < todayItem.rank) {
-    return { label: `⬇ -${todayItem.rank - yRank}`, cls: "delta-down" };
-  }
-
+  if (yRank === undefined) return { label: "🆕 新進榜", cls: "delta-new" };
+  if (yRank > todayItem.rank) return { label: `⬆ +${yRank - todayItem.rank}`, cls: "delta-up" };
+  if (yRank < todayItem.rank) return { label: `⬇ -${todayItem.rank - yRank}`, cls: "delta-down" };
   return { label: "⏸", cls: "delta-same" };
 }
 
-async function run() {
-  const todayData = await loadJSON(today);
-
-  if (!todayData) {
-    return;
-  }
-
-  // （1）Momentum 計算
-  for (const item of todayData.items) {
-    item.momentum = await calcMomentum(item.code, historyDates);
-  }
-
-  // 🔽【就在這裡，加 Composite Score】🔽
-  for (const item of todayData.items) {
-    item.composite = Number(
-      (item.changePct * item.momentum).toFixed(2)
-    );
-  }
-
-  // 🔽【接著立刻用 Composite 排序】🔽
-  todayData.items.sort((a, b) => b.composite - a.composite);
-
-  // （2）renderMeta
-  renderMeta(todayData, null);
-
-  // （3）renderTable
-  renderTable(todayData.items, diffItems(todayData, null));
-}
-
-
-  let yesterdayData = null;
-  if (yesterday) {
-    yesterdayData = await loadJSON(yesterday);
-  }
-
-  renderMeta(todayData, yesterdayData);
-  renderTable(todayData.items, diffItems(todayData, yesterdayData));
-}
-
- function renderMeta(todayData, yesterdayData) {
+function renderMeta(todayData, yesterdayData) {
   const meta = document.getElementById("meta");
+  if (!meta) return;
 
   if (!todayData) {
     meta.innerText = "⚠ 無資料";
     return;
   }
-
   const date = todayData.date || "N/A";
-  const count = todayData.count || todayData.items.length;
-
-  let note = "";
-  if (!yesterdayData) {
-    note = "｜無昨日資料";
-  }
-
-  meta.innerText = `日期：${date} ｜ 筆數：${count} ${note}`;
+  const count = Array.isArray(todayData.items) ? todayData.items.length : 0;
+  meta.innerText = `日期：${date} ｜ 筆數：${count} ${!yesterdayData ? "｜無昨日資料" : ""}`;
 }
- 
 
 function renderTable(items, yesterdayMap) {
   const container = document.getElementById("content");
+  if (!container) return;
 
-  let html = `
-    <table>
-      <thead>
-        <tr>
-          <th>Rank</th>
-          <th>變化</th>
-          <th>代碼</th>
-          <th>名稱</th>
-          <th>收盤價</th>
-          <th>漲跌幅 (%)</th>
-        </tr>
-      </thead>
-      <tbody>
-  `;
+  if (!items || items.length === 0) {
+    container.innerHTML = "無資料顯示";
+    return;
+  }
+
+  let html = `<table><thead><tr>
+    <th>Rank</th><th>變化</th><th>代碼</th><th>名稱</th><th>收盤價</th><th>漲跌幅 (%)</th>
+  </tr></thead><tbody>`;
 
   items.forEach(item => {
     const delta = calcDelta(item, yesterdayMap);
-    const cls = item.changePct >= 0 ? "up" : "down";
+    const close = Number(item.close);
+    const pct = Number(item.changePct);
 
+    const cls = pct >= 0 ? "up" : "down";
     html += `
       <tr>
         <td>${item.rank}</td>
         <td class="${delta.cls}">${delta.label}</td>
         <td>${item.code}</td>
         <td>${item.name}</td>
-        <td>${item.close.toFixed(2)}</td>
-        <td class="${cls}">${item.changePct.toFixed(2)}</td>
-      </tr>
-    `;
+        <td>${Number.isFinite(close) ? close.toFixed(2) : "0.00"}</td>
+        <td class="${cls}">${Number.isFinite(pct) ? pct.toFixed(2) : "0.00"}</td>
+      </tr>`;
   });
 
-  html += `
-      </tbody>
-    </table>
-  `;
-
+  html += `</tbody></table>`;
   container.innerHTML = html;
 }
 
-function diffItems(todayData, yesterdayData) {
-  // 尚未啟用昨日比對，回傳空物件即可
-  return {};
+/* ====== Main ====== */
+async function run() {
+  console.log("KC AiOS: run() start");
+
+  const todayData = await loadJSON(today);
+
+  // ✅ 如果載不到，直接在畫面顯示錯誤，不要卡 Loading
+  const container = document.getElementById("content");
+  if (!todayData || !todayData.items) {
+    if (container) container.innerText = "無法載入資料：請確認 data/latest.json 是否存在且可讀取。";
+    console.error("todayData invalid:", todayData);
+    return;
+  }
+
+  renderMeta(todayData, null);
+  renderTable(todayData.items, {});
 }
 
-  
+window.run = run;
+
+/* ====== Auto Boot (iOS/Safari Safe) ====== */
+const BUILD_ID = "2026-01-15-v3";
+console.log("KC Dashboard build:", BUILD_ID);
+
+// ✅ 這個寫法比 DOMContentLoaded 更穩：事件錯過也會立刻執行
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", () => window.run(), { once: true });
+} else {
+  window.run();
+}
 </script>
-
-<script type="module">
-    const BUILD_ID = "2026-01-15-fix"; // 更新 ID 確保快取刷新
-    console.log("KC Dashboard build:", BUILD_ID);
-
-    // 檢查全域是否有 run 函數
-    if (typeof window.run === 'function') {
-        window.run();
-    } else {
-        // 如果還是找不到，嘗試延遲 500ms 執行（有時是載入順序問題）
-        setTimeout(() => {
-            if (window.run) window.run();
-            else document.body.insertAdjacentHTML('afterbegin', '<p style="color:red">啟動失敗：核心組件未就緒</p>');
-        }, 500);
-    }
-</script>
-
-
 </body>
 </html>
