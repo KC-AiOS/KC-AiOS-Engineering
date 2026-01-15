@@ -147,17 +147,12 @@ async function loadJSON(date) {
 }
 
 async function loadTodayData() {
-  // 優先嘗試讀取最新資料標籤，這通常是最穩定的入口
+  // 先嘗試抓 latest，這最穩定
   let data = await loadJSON("latest");
-  
-  if (data) {
-    console.log("成功載入 latest.json");
-    return data;
-  }
+  if (data) return data;
 
-  // 如果 latest 失敗，才嘗試抓取當天日期
+  // 如果 latest 失敗，才嘗試抓取當天日期檔案
   const today = new Date().toISOString().slice(0, 10);
-  console.log(`嘗試抓取當日檔案: ${today}`);
   return await loadJSON(today);
 }
 
