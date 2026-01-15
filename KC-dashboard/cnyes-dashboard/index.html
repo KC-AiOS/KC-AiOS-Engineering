@@ -250,11 +250,26 @@ function diffItems(todayData, yesterdayData) {
 </script>
 
 <script type="module">
-  const BUILD_ID = "2026-01-14-01";
-  console.log("KC Dashboard build:", BUILD_ID);
+    const BUILD_ID = "2026-01-14-01";
+    console.log("KC Dashboard build:", BUILD_ID);
 
-  window.run(); // ← 明確呼叫
+    // 確保 run 已經被 import 進來，或者就在這個 module 裡定義
+    // 如果 run 是在別的 module 檔案，需要先 import：
+    // import { run } from './your-script-file.js';
+
+    try {
+        if (typeof run === 'function') {
+            run();
+        } else if (window.run) {
+            window.run();
+        } else {
+            console.error("找不到 run 函數，請檢查腳本載入順序");
+        }
+    } catch (e) {
+        console.error("執行出錯:", e);
+    }
 </script>
+
 
 </body>
 </html>
