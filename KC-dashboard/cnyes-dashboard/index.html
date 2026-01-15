@@ -207,19 +207,17 @@ function renderTableRange(range) {
 
 /* ====== Main ====== */
 async function run() {
-  console.log("KC AiOS: run() start");
-
-  GLOBAL_todayData = await loadTodayData();
+  // ... 載入資料邏輯 ...
   
   if (!GLOBAL_todayData || !GLOBAL_todayData.items) {
-    document.getElementById("content").innerHTML = 
-      `<div style="color:orange; padding:20px;">目前無法取得資料，請檢查 data 資料夾中是否有 latest.json 檔案。</div>`;
-    return;
+      document.getElementById("content").innerHTML = "目前無法取得資料，請檢查 data 資料夾。";
+      return;
   }
 
-  const yData = await loadYesterdayData();
-  // ... 後續渲染邏輯 ...
-}
+  // 渲染頁面
+  renderMeta(GLOBAL_todayData, yData);
+  renderTableRange(GLOBAL_currentRange);
+} // <--- 確保這裏有關閉大括號
 
   renderMeta(GLOBAL_todayData, yData);
   renderTableRange(GLOBAL_currentRange);
