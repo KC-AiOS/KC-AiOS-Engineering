@@ -101,7 +101,9 @@
 
 <script>
 /* ====== Core Config ====== */
-const today = "latest";
+/*const today = "latest";
+const today = new Date().toISOString().slice(0, 10);
+fetch(`./data/${today}.json`)
 const yesterday = null;
 
 /* ====== Helpers ====== */
