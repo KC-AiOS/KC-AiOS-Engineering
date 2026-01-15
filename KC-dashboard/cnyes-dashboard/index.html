@@ -128,6 +128,11 @@ const today = new Date().toISOString().slice(0, 10);
 fetch(`./data/${today}.json`)
 const yesterday = null;
 
+  /* ====== Global State ====== */
+let GLOBAL_todayData = null;
+let GLOBAL_yesterdayMap = {};
+let GLOBAL_currentRange = 50;
+
 /* ====== Helpers ====== */
 async function loadJSON(date) {
   try {
@@ -143,22 +148,15 @@ async function loadJSON(date) {
 
 async function loadTodayData() {
   const today = new Date().toISOString().slice(0, 10);
-
   let data = await loadJSON(today);
   if (data) return data;
-
-  data = await loadJSON("latest");
-  if (data) return data;
-
-  throw new Error("No data available (today & latest missing)");
+  return await loadJSON("latest");
 }
 
 async function loadYesterdayData() {
-  let data = await loadJSON("yesterday"); // 對應 data/yesterday.json
-  return data; // 可能為 null，沒關係
+  return await loadJSON("yesterday");
 }
 
-/* 排名變化邏輯 */
 function calcDelta(todayItem, yesterdayMap) {
   const yRank = yesterdayMap[todayItem.code];
   if (yRank === undefined) return { label: "🆕 新進榜", cls: "delta-new" };
@@ -169,39 +167,26 @@ function calcDelta(todayItem, yesterdayMap) {
 
 function renderMeta(todayData, yesterdayData) {
   const meta = document.getElementById("meta");
-  if (!meta) return;
-
-  if (!todayData) {
-    meta.innerText = "⚠ 無資料";
-    return;
-  }
-
   const date = todayData.date || "N/A";
-  const count = Array.isArray(todayData.items) ? todayData.items.length : 0;
+  const count = todayData.items ? todayData.items.length : 0;
   const y = yesterdayData ? yesterdayData.date : "無";
-
   meta.innerText = `日期：${date} ｜ 筆數：${count} ｜ 昨日：${y}`;
 }
 
-function renderTable(items, yesterdayMap) {
+function renderTableRange(range) {
   const container = document.getElementById("content");
-  if (!container) return;
-
-  if (!items || items.length === 0) {
-    container.innerHTML = "無資料顯示";
-    return;
-  }
+  const items = GLOBAL_todayData.items.slice(0, range);
 
   let html = `<table><thead><tr>
     <th>Rank</th><th>變化</th><th>代碼</th><th>名稱</th><th>收盤價</th><th>漲跌幅 (%)</th>
   </tr></thead><tbody>`;
 
   items.forEach(item => {
-    const delta = calcDelta(item, yesterdayMap);
+    const delta = calcDelta(item, GLOBAL_yesterdayMap);
     const close = Number(item.close);
     const pct = Number(item.changePct);
-
     const cls = pct >= 0 ? "up" : "down";
+
     html += `
       <tr>
         <td>${item.rank}</td>
@@ -221,41 +206,50 @@ function renderTable(items, yesterdayMap) {
 async function run() {
   console.log("KC AiOS: run() start");
 
-  const todayData = await loadTodayData();
+  // Load data
+  GLOBAL_todayData = await loadTodayData();
   const yData = await loadYesterdayData();
 
-  // 建立昨天 rank map（code → rank）
-  let yMap = {};
+  // Build yesterday rank map
+  GLOBAL_yesterdayMap = {};
   if (yData && Array.isArray(yData.items)) {
     yData.items.forEach(item => {
-      yMap[item.code] = item.rank;
+      GLOBAL_yesterdayMap[item.code] = item.rank;
     });
   }
 
-  const container = document.getElementById("content");
-  if (!todayData || !todayData.items) {
-    if (container) container.innerText = "無法載入資料：請確認 data/latest.json 是否存在且可讀取。";
-    console.error("todayData invalid:", todayData);
-    return;
-  }
-
-  renderMeta(todayData, yData);
-  renderTable(todayData.items, yMap);
+  renderMeta(GLOBAL_todayData, yData);
+  renderTableRange(GLOBAL_currentRange);
 }
 
+/* ====== Range Button Logic ====== */
+function setupRangeSelector() {
+  const buttons = document.querySelectorAll(".range-btn");
+  buttons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      buttons.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
 
+      GLOBAL_currentRange = Number(btn.dataset.range);
+      renderTableRange(GLOBAL_currentRange);
+    });
+  });
+}
+
+/* ====== Boot ====== */
 window.run = run;
 
-/* ====== Auto Boot (iOS/Safari Safe) ====== */
-const BUILD_ID = "2026-01-15-v3";
-console.log("KC Dashboard build:", BUILD_ID);
-
-// ✅ 這個寫法比 DOMContentLoaded 更穩：事件錯過也會立刻執行
 if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", () => window.run(), { once: true });
+  document.addEventListener("DOMContentLoaded", () => {
+    setupRangeSelector();
+    run();
+  });
 } else {
-  window.run();
+  setupRangeSelector();
+  run();
 }
+
+
 </script>
 </body>
 </html>
