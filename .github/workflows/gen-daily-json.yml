@@ -1,46 +1,41 @@
 name: Generate Daily Stock JSON
 
 on:
+  workflow_dispatch:
   schedule:
-    # 每天台灣時間 18:00（UTC 10:00）
-    - cron: "0 10 * * *"
-  workflow_dispatch: {}   # 手動執行用（重要）
+    - cron: "0 1 * * *" # UTC 01:00 = 台灣早上 09:00
 
 jobs:
-  gen-json:
+  build:
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: cnyes-dashboard
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
-      - name: Generate today json
+      - name: Prepare
         run: |
-        TODAY=$(date -u +"%Y-%m-%d")
-        echo "Today: $TODAY"
+          TODAY=$(date -u +"%Y-%m-%d")
+          echo "Today: $TODAY"
+          mkdir -p data
 
-        # 確保目標資料夾存在
-        mkdir -p cnyes-dashboard/data
+          if [ ! -f data/latest.json ]; then
+            echo "❌ latest.json 不存在！"
+            exit 1
+          fi
 
-        # 檢查 latest.json（正確路徑）
-        if [ ! -f cnyes-dashboard/data/latest.json ]; then
-         echo "❌ cnyes-dashboard/data/latest.json 不存在"
-         exit 1
-        fi
+          # 產生今日檔案
+          cp data/latest.json data/$TODAY.json
 
-        # 複製成今日檔
-        cp cnyes-dashboard/data/latest.json cnyes-dashboard/data/$TODAY.json
-
-
-
-          # 強制修正 date 欄位（如果有）
-          jq --arg d "$TODAY" '.date=$d' data/$TODAY.json > /tmp/tmp.json || cp data/$TODAY.json /tmp/tmp.json
-          mv /tmp/tmp.json data/$TODAY.json
-
-      - name: Commit & push
+      - name: Commit & Push
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add data/*.json
-          git commit -m "auto: generate daily json $(date -u +"%Y-%m-%d")" || echo "Nothing to commit"
+
+          git add data/*
+          git commit -m "Daily JSON update: $TODAY" || echo "No changes"
           git push
