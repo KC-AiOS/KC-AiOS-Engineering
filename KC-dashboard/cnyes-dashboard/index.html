@@ -2,70 +2,339 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8" />
-  <title>CNYES 漲幅排行</title>
+  <title>KC-WebTrace｜台股排行 Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
 
   <style>
-    body { font-family: system-ui; padding:20px; background:#f5f7fa; }
-    table { width:100%; border-collapse:collapse; background:white; }
-    th,td { padding:10px; border-bottom:1px solid #eee; }
-    th { background:#f0f2f5; text-align:left; }
-    .up { color:#c0392b; font-weight:600; }
-    .down { color:#27ae60; font-weight:600; }
-    .delta-new { color:#8e44ad; }
-    .delta-up { color:#c0392b; }
-    .delta-down { color:#27ae60; }
-    .delta-same { color:#7f8c8d; }
+    /* ====== Base Styles ====== */
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont;
+      margin: 0;
+      padding: 20px;
+      background: #f5f7fa;
+    }
+
+    h1 {
+      margin-bottom: 6px;
+    }
+
+    footer {
+      margin-top: 20px;
+      font-size: 12px;
+      color: #999;
+    }
+
+    /* ====== Meta Info ====== */
+    .meta {
+      color: #666;
+      margin-bottom: 16px;
+      font-size: 14px;
+    }
+
+    /* ====== Table Styles ====== */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #eee;
+      text-align: right;
+      font-size: 14px;
+    }
+
+    th {
+      background: #f0f2f5;
+      color: #333;
+    }
+
+    th:first-child,
+    td:first-child {
+      text-align: center;
+      width: 60px;
+    }
+
+    th:nth-child(2),
+    td:nth-child(2),
+    th:nth-child(3),
+    td:nth-child(3) {
+      text-align: left;
+    }
+
+    /* ====== Status Styles ====== */
+    .loading {
+      padding: 20px;
+      color: #999;
+    }
+
+    .error {
+      padding: 20px;
+      color: #c0392b;
+      background: #fff;
+      border-radius: 6px;
+      border: 1px solid #eee;
+    }
+
+    /* ====== Price Change Styles ====== */
+    .up {
+      color: #c0392b;
+      font-weight: 600;
+    }
+
+    .down {
+      color: #27ae60;
+      font-weight: 600;
+    }
+
+    /* ====== Rank Delta Styles ====== */
+    .delta-new {
+      color: #8e44ad;
+      font-weight: 600;
+    }
+
+    .delta-up {
+      color: #c0392b;
+      font-weight: 600;
+    }
+
+    .delta-down {
+      color: #27ae60;
+      font-weight: 600;
+    }
+
+    .delta-same {
+      color: #7f8c8d;
+    }
+
+    /* ====== Range Selector ====== */
+    .range-btn {
+      padding: 6px 12px;
+      margin-right: 6px;
+      border: none;
+      border-radius: 4px;
+      background: #dfe6e9;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .range-btn.active {
+      background: #0984e3;
+      color: white;
+      font-weight: 600;
+    }
   </style>
 </head>
 
 <body>
+  <h1>📈 台股漲幅排行 Dashboard</h1>
+  <div class="meta" id="meta">載入中…</div>
 
-<h1>📈 CNYES 台股漲幅排行  /by ChatGPT</h1>
-<div id="meta"></div>
-<div id="content">載入中...</div>
+  <div id="range-selector" style="margin-bottom: 12px;">
+    <button data-range="50" class="range-btn active">Top 50</button>
+    <button data-range="100" class="range-btn">Top 100</button>
+    <button data-range="200" class="range-btn">Top 200</button>
+  </div>
 
-<div style="margin:12px 0;">
-  <button class="range-btn" data-r="50">Top 50</button>
-  <button class="range-btn" data-r="100">Top 100</button>
-  <button class="range-btn" data-r="200">Top 200</button>
-</div>
+  <div id="content" class="loading">Loading data…</div>
 
-<script src="../core/core.js"></script>
-<script src="./config.js"></script>
+  <footer>
+    資料來源：鉅亨網｜本頁為觀測用途，不構成投資建議
+  </footer>
 
-<script>
-(async function(){
-  const core = window.KCAiOS;
-  const cfg  = window.KCDashConfig;
-
-  const metaDOM = document.getElementById("meta");
-  const content = document.getElementById("content");
-
-  const today = await core.loadToday(cfg.DATA_PATH);
-  const yData = await core.loadYesterday(cfg.DATA_PATH);
-
-  // 建立 yesterday map
-  const yMap = {};
-  if (yData?.items) {
-    yData.items.forEach(x => { yMap[x.code] = x.rank; });
-  }
-
-  // 渲染 meta
-  core.renderMeta(metaDOM, today, yData);
-
-  // 預設顯示範圍
-  core.renderTable(content, today, yMap, cfg.DEFAULT_RANGE);
-
-  // 設定按鈕切換
-  document.querySelectorAll(".range-btn").forEach(btn => {
-    btn.onclick = () => {
-      const r = Number(btn.dataset.r);
-      core.renderTable(content, today, yMap, r);
+  <script>
+    /* ============================================================================
+     * Global State
+     * ============================================================================ */
+    const State = {
+      todayData: null,
+      yesterdayMap: {},
+      currentRange: 50
     };
-  });
 
-})();
-</script>
+    /* ============================================================================
+     * Data Loading
+     * ============================================================================ */
+    async function loadJSON(date) {
+      try {
+        const url = `./data/${date}.json?t=${Date.now()}`;
+        const res = await fetch(url, { cache: "no-store" });
 
+        if (!res.ok) {
+          console.warn(`[KC AiOS] 檔案 ${date}.json 不存在`);
+          return null;
+        }
+        return await res.json();
+      } catch (err) {
+        console.error("載入 JSON 失敗:", err);
+        return null;
+      }
+    }
+
+    async function loadTodayData() {
+      // 先嘗試載入 latest.json
+      let data = await loadJSON("latest");
+      if (data) return data;
+
+      // 如果 latest 不存在，嘗試載入今日日期檔案
+      const today = new Date().toISOString().slice(0, 10);
+      return await loadJSON(today);
+    }
+
+    async function loadYesterdayData() {
+      return await loadJSON("yesterday");
+    }
+
+    /* ============================================================================
+     * Data Processing
+     * ============================================================================ */
+    function buildYesterdayMap(yesterdayData) {
+      const map = {};
+      if (yesterdayData && yesterdayData.items) {
+        yesterdayData.items.forEach(item => {
+          map[item.code] = item.rank;
+        });
+      }
+      return map;
+    }
+
+    function calcDelta(todayItem, yesterdayMap) {
+      const yRank = yesterdayMap[todayItem.code];
+      if (yRank === undefined) {
+        return { label: "🆕 新進榜", cls: "delta-new" };
+      }
+      if (yRank > todayItem.rank) {
+        return { label: `⬆ +${yRank - todayItem.rank}`, cls: "delta-up" };
+      }
+      if (yRank < todayItem.rank) {
+        return { label: `⬇ -${todayItem.rank - yRank}`, cls: "delta-down" };
+      }
+      return { label: "⏸", cls: "delta-same" };
+    }
+
+    /* ============================================================================
+     * Rendering
+     * ============================================================================ */
+    function renderMeta(todayData, yesterdayData) {
+      const meta = document.getElementById("meta");
+      const date = todayData.date || "N/A";
+      const count = todayData.items ? todayData.items.length : 0;
+      const y = yesterdayData ? yesterdayData.date : "無";
+      meta.innerText = `日期：${date} ｜ 筆數：${count} ｜ 昨日：${y}`;
+    }
+
+    function renderTableRange(range) {
+      const container = document.getElementById("content");
+
+      if (!State.todayData || !State.todayData.items) {
+        container.innerHTML = '<div class="error">目前無法取得資料，請檢查 data 資料夾。</div>';
+        return;
+      }
+
+      const items = State.todayData.items.slice(0, range);
+
+      let html = `
+        <table>
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>變化</th>
+              <th>代碼</th>
+              <th>名稱</th>
+              <th>收盤價</th>
+              <th>漲跌幅 (%)</th>
+            </tr>
+          </thead>
+          <tbody>`;
+
+      items.forEach(item => {
+        const delta = calcDelta(item, State.yesterdayMap);
+        const close = Number(item.close);
+        const pct = Number(item.changePct);
+        const cls = pct >= 0 ? "up" : "down";
+
+        html += `
+          <tr>
+            <td>${item.rank}</td>
+            <td class="${delta.cls}">${delta.label}</td>
+            <td>${item.code}</td>
+            <td>${item.name}</td>
+            <td>${Number.isFinite(close) ? close.toFixed(2) : "0.00"}</td>
+            <td class="${cls}">${Number.isFinite(pct) ? pct.toFixed(2) : "0.00"}</td>
+          </tr>`;
+      });
+
+      html += `
+          </tbody>
+        </table>`;
+
+      container.innerHTML = html;
+    }
+
+    /* ============================================================================
+     * Event Handlers
+     * ============================================================================ */
+    function setupRangeSelector() {
+      const buttons = document.querySelectorAll(".range-btn");
+      buttons.forEach(btn => {
+        btn.addEventListener("click", () => {
+          // 更新按鈕狀態
+          buttons.forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+
+          // 更新範圍並重新渲染
+          State.currentRange = Number(btn.dataset.range);
+          renderTableRange(State.currentRange);
+        });
+      });
+    }
+
+    /* ============================================================================
+     * Main Application Logic
+     * ============================================================================ */
+    async function run() {
+      // 載入資料
+      State.todayData = await loadTodayData();
+      const yesterdayData = await loadYesterdayData();
+
+      // 建立昨日排名對照表
+      State.yesterdayMap = buildYesterdayMap(yesterdayData);
+
+      // 檢查資料是否載入成功
+      if (!State.todayData || !State.todayData.items) {
+        document.getElementById("content").innerHTML = '<div class="error">目前無法取得資料，請檢查 data 資料夾。</div>';
+        document.getElementById("meta").innerText = "資料載入失敗";
+        return;
+      }
+
+      // 渲染頁面
+      renderMeta(State.todayData, yesterdayData);
+      renderTableRange(State.currentRange);
+    }
+
+    /* ============================================================================
+     * Initialization
+     * ============================================================================ */
+    function init() {
+      setupRangeSelector();
+      run();
+    }
+
+    // 啟動應用程式
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", init);
+    } else {
+      init();
+    }
+
+    // 導出 run 函數供外部調用（如果需要）
+    window.run = run;
+  </script>
 </body>
 </html>
