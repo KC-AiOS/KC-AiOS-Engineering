@@ -2,279 +2,70 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8" />
-  <title>KC-WebTrace｜台股排行 Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
-
+  <title>CNYES 漲幅排行</title>
 
   <style>
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont;
-      margin: 0;
-      padding: 20px;
-      background: #f5f7fa;
-    }
-
-    h1 {
-      margin-bottom: 6px;
-    }
-
-    .meta {
-      color: #666;
-      margin-bottom: 16px;
-      font-size: 14px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: #fff;
-      border-radius: 6px;
-      overflow: hidden;
-    }
-
-    th, td {
-      padding: 10px 12px;
-      border-bottom: 1px solid #eee;
-      text-align: right;
-      font-size: 14px;
-    }
-
-    th {
-      background: #f0f2f5;
-      color: #333;
-    }
-
-    th:first-child,
-    td:first-child {
-      text-align: center;
-      width: 60px;
-    }
-
-    th:nth-child(2),
-    td:nth-child(2),
-    th:nth-child(3),
-    td:nth-child(3) {
-      text-align: left;
-    }
-
-    .up {
-      color: #c0392b;
-      font-weight: 600;
-    }
-
-    .down {
-      color: #27ae60;
-      font-weight: 600;
-    }
-
-    .loading {
-      padding: 20px;
-      color: #999;
-    }
-
-    .error {
-      padding: 20px;
-      color: #c0392b;
-      background: #fff;
-      border-radius: 6px;
-      border: 1px solid #eee;
-    }
-
-    footer {
-      margin-top: 20px;
-      font-size: 12px;
-      color: #999;
-    }
-
-  .delta-new { color: #8e44ad; font-weight: 600; }
-  .delta-up { color: #c0392b; font-weight: 600; }
-  .delta-down { color: #27ae60; font-weight: 600; }
-  .delta-same { color: #7f8c8d; }
-    
-    .range-btn {
-  padding: 6px 12px;
-  margin-right: 6px;
-  border: none;
-  border-radius: 4px;
-  background: #dfe6e9;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.range-btn.active {
-  background: #0984e3;
-  color: white;
-  font-weight: 600;
-}
+    body { font-family: system-ui; padding:20px; background:#f5f7fa; }
+    table { width:100%; border-collapse:collapse; background:white; }
+    th,td { padding:10px; border-bottom:1px solid #eee; }
+    th { background:#f0f2f5; text-align:left; }
+    .up { color:#c0392b; font-weight:600; }
+    .down { color:#27ae60; font-weight:600; }
+    .delta-new { color:#8e44ad; }
+    .delta-up { color:#c0392b; }
+    .delta-down { color:#27ae60; }
+    .delta-same { color:#7f8c8d; }
   </style>
 </head>
 
 <body>
 
-<h1>📈 台股漲幅排行 Dashboard</h1>
-<div class="meta" id="meta">載入中…</div>
+<h1>📈 CNYES 台股漲幅排行</h1>
+<div id="meta"></div>
+<div id="content">載入中...</div>
 
-<div id="content" class="loading">Loading data…</div>
-  <div id="range-selector" style="margin-bottom: 12px;">
-  <button data-range="50" class="range-btn active">Top 50</button>
-  <button data-range="100" class="range-btn">Top 100</button>
-  <button data-range="200" class="range-btn">Top 200</button>
+<div style="margin:12px 0;">
+  <button class="range-btn" data-r="50">Top 50</button>
+  <button class="range-btn" data-r="100">Top 100</button>
+  <button class="range-btn" data-r="200">Top 200</button>
 </div>
 
-
-<footer>
-  資料來源：鉅亨網｜本頁為觀測用途，不構成投資建議
-</footer>
+<script src="../core/core.js"></script>
+<script src="./config.js"></script>
 
 <script>
-  /* ====== Global State ====== */
-let GLOBAL_todayData = null;
-let GLOBAL_yesterdayMap = {};
-let GLOBAL_currentRange = 50;
+(async function(){
+  const core = window.KCAiOS;
+  const cfg  = window.KCDashConfig;
 
-/* ====== Helpers ====== */
+  const metaDOM = document.getElementById("meta");
+  const content = document.getElementById("content");
 
-async function loadJSON(date) {
-  try {
-    const url = `./data/${date}.json?t=${Date.now()}`; // 建議改用相對路徑
-    const res = await fetch(url, { cache: "no-store" });
+  const today = await core.loadToday(cfg.DATA_PATH);
+  const yData = await core.loadYesterday(cfg.DATA_PATH);
 
-    // 關鍵修正：如果 404，不拋出錯誤，而是回傳 null
-    if (!res.ok) {
-      console.warn(`[KC AiOS] 檔案 ${date}.json 不存在`);
-      return null; 
-    }
-    return await res.json();
-  } catch (err) {
-    console.error("載入 JSON 失敗:", err);
-    return null;
+  // 建立 yesterday map
+  const yMap = {};
+  if (yData?.items) {
+    yData.items.forEach(x => { yMap[x.code] = x.rank; });
   }
-}
 
-async function loadTodayData() {
-  // 先嘗試抓 latest，這最穩定
-  let data = await loadJSON("latest");
-  if (data) return data;
+  // 渲染 meta
+  core.renderMeta(metaDOM, today, yData);
 
-  // 如果 latest 失敗，才嘗試抓取當天日期檔案
-  const today = new Date().toISOString().slice(0, 10);
-  return await loadJSON(today);
-}
+  // 預設顯示範圍
+  core.renderTable(content, today, yMap, cfg.DEFAULT_RANGE);
 
-async function loadYesterdayData() {
-  return await loadJSON("yesterday");
-}
-
-function calcDelta(todayItem, yesterdayMap) {
-  const yRank = yesterdayMap[todayItem.code];
-  if (yRank === undefined) return { label: "🆕 新進榜", cls: "delta-new" };
-  if (yRank > todayItem.rank) return { label: `⬆ +${yRank - todayItem.rank}`, cls: "delta-up" };
-  if (yRank < todayItem.rank) return { label: `⬇ -${todayItem.rank - yRank}`, cls: "delta-down" };
-  return { label: "⏸", cls: "delta-same" };
-}
-
-function renderMeta(todayData, yesterdayData) {
-  const meta = document.getElementById("meta");
-  const date = todayData.date || "N/A";
-  const count = todayData.items ? todayData.items.length : 0;
-  const y = yesterdayData ? yesterdayData.date : "無";
-  meta.innerText = `日期：${date} ｜ 筆數：${count} ｜ 昨日：${y}`;
-}
-
-function renderTableRange(range) {
-  const container = document.getElementById("content");
-  
-  if (!GLOBAL_todayData || !GLOBAL_todayData.items) {
-    container.innerHTML = '<div class="error">目前無法取得資料，請檢查 data 資料夾。</div>';
-    return;
-  }
-  
-  const items = GLOBAL_todayData.items.slice(0, range);
-
-  let html = `<table><thead><tr>
-    <th>Rank</th><th>變化</th><th>代碼</th><th>名稱</th><th>收盤價</th><th>漲跌幅 (%)</th>
-  </tr></thead><tbody>`;
-
-  items.forEach(item => {
-    const delta = calcDelta(item, GLOBAL_yesterdayMap);
-    const close = Number(item.close);
-    const pct = Number(item.changePct);
-    const cls = pct >= 0 ? "up" : "down";
-
-    html += `
-      <tr>
-        <td>${item.rank}</td>
-        <td class="${delta.cls}">${delta.label}</td>
-        <td>${item.code}</td>
-        <td>${item.name}</td>
-        <td>${Number.isFinite(close) ? close.toFixed(2) : "0.00"}</td>
-        <td class="${cls}">${Number.isFinite(pct) ? pct.toFixed(2) : "0.00"}</td>
-      </tr>`;
+  // 設定按鈕切換
+  document.querySelectorAll(".range-btn").forEach(btn => {
+    btn.onclick = () => {
+      const r = Number(btn.dataset.r);
+      core.renderTable(content, today, yMap, r);
+    };
   });
 
-  html += `</tbody></table>`;
-  container.innerHTML = html;
-}
-
-/* ====== Main ====== */
-async function run() {
-  // 載入今日資料
-  GLOBAL_todayData = await loadTodayData();
-  
-  // 載入昨日資料（可選，失敗也不影響）
-  const yData = await loadYesterdayData();
-  
-  // 建立昨日排名對照表
-  if (yData && yData.items) {
-    GLOBAL_yesterdayMap = {};
-    yData.items.forEach(item => {
-      GLOBAL_yesterdayMap[item.code] = item.rank;
-    });
-  }
-  
-  // 檢查資料是否載入成功
-  if (!GLOBAL_todayData || !GLOBAL_todayData.items) {
-    document.getElementById("content").innerHTML = "目前無法取得資料，請檢查 data 資料夾。";
-    return;
-  }
-
-  // 渲染頁面
-  renderMeta(GLOBAL_todayData, yData);
-  renderTableRange(GLOBAL_currentRange);
-}
-
-/* ====== Range Button Logic ====== */
-function setupRangeSelector() {
-  const buttons = document.querySelectorAll(".range-btn");
-  buttons.forEach(btn => {
-    btn.addEventListener("click", () => {
-      buttons.forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-
-      GLOBAL_currentRange = Number(btn.dataset.range);
-      renderTableRange(GLOBAL_currentRange);
-    });
-  });
-}
-
-/* ====== Boot ====== */
-window.run = run;
-
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", () => {
-    setupRangeSelector();
-    run();
-  });
-} else {
-  setupRangeSelector();
-  run();
-}
-
-
+})();
 </script>
+
 </body>
 </html>
-
