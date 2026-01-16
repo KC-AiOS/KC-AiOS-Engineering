@@ -75,6 +75,14 @@
       color: #999;
     }
 
+    .error {
+      padding: 20px;
+      color: #c0392b;
+      background: #fff;
+      border-radius: 6px;
+      border: 1px solid #eee;
+    }
+
     footer {
       margin-top: 20px;
       font-size: 12px;
@@ -178,6 +186,12 @@ function renderMeta(todayData, yesterdayData) {
 
 function renderTableRange(range) {
   const container = document.getElementById("content");
+  
+  if (!GLOBAL_todayData || !GLOBAL_todayData.items) {
+    container.innerHTML = '<div class="error">目前無法取得資料，請檢查 data 資料夾。</div>';
+    return;
+  }
+  
   const items = GLOBAL_todayData.items.slice(0, range);
 
   let html = `<table><thead><tr>
@@ -207,18 +221,27 @@ function renderTableRange(range) {
 
 /* ====== Main ====== */
 async function run() {
-  // ... 載入資料邏輯 ...
+  // 載入今日資料
+  GLOBAL_todayData = await loadTodayData();
   
+  // 載入昨日資料（可選，失敗也不影響）
+  const yData = await loadYesterdayData();
+  
+  // 建立昨日排名對照表
+  if (yData && yData.items) {
+    GLOBAL_yesterdayMap = {};
+    yData.items.forEach(item => {
+      GLOBAL_yesterdayMap[item.code] = item.rank;
+    });
+  }
+  
+  // 檢查資料是否載入成功
   if (!GLOBAL_todayData || !GLOBAL_todayData.items) {
-      document.getElementById("content").innerHTML = "目前無法取得資料，請檢查 data 資料夾。";
-      return;
+    document.getElementById("content").innerHTML = "目前無法取得資料，請檢查 data 資料夾。";
+    return;
   }
 
   // 渲染頁面
-  renderMeta(GLOBAL_todayData, yData);
-  renderTableRange(GLOBAL_currentRange);
-} // <--- 確保這裏有關閉大括號
-
   renderMeta(GLOBAL_todayData, yData);
   renderTableRange(GLOBAL_currentRange);
 }
@@ -254,3 +277,4 @@ if (document.readyState === "loading") {
 </script>
 </body>
 </html>
+
