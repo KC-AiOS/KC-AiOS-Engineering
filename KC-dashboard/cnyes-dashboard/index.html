@@ -221,49 +221,22 @@
     /* ============================================================================
      * Rendering
      * ============================================================================ */
-     function getCurrentDate() {
-      const today = new Date();
-      const year = today.getFullYear();
-      const month = String(today.getMonth() + 1).padStart(2, '0');
-      const day = String(today.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    }
-
-    function getYesterdayDate() {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      const year = yesterday.getFullYear();
-      const month = String(yesterday.getMonth() + 1).padStart(2, '0');
-      const day = String(yesterday.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    }
-
-    function isValidDate(dateString) {
-      if (!dateString || typeof dateString !== 'string') return false;
-      // 檢查是否為有效的日期格式 (YYYY-MM-DD)
-      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-      if (!dateRegex.test(dateString)) return false;
-      const date = new Date(dateString);
-      return date instanceof Date && !isNaN(date);
-    }
-
-    function formatDate(dateString) {
-      // 如果日期無效或不存在，使用當前日期
-      if (!isValidDate(dateString)) {
-        return getCurrentDate();
-      }
-      return dateString;
-    }
-
-    function renderMeta(todayData, yesterdayData) {
+      function renderMeta(todayData, yesterdayData) {
       const meta = document.getElementById("meta");
-      // 優先使用 JSON 中的日期，但如果是無效日期則使用當前日期
-      const date = formatDate(todayData?.date);
+      
+      // 今日日期：使用 JSON 資料或當前日期
+      let date = todayData?.date;
+      if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        const today = new Date();
+        date = today.toISOString().slice(0, 10);
+      }
+      
+      // 昨日日期：根據今日日期計算
+      const today = new Date(date);
+      today.setDate(today.getDate() - 1);
+      const y = today.toISOString().slice(0, 10);
+      
       const count = todayData?.items ? todayData.items.length : 0;
-      // 昨日日期：優先使用 JSON 資料，否則自動計算
-      const y = (yesterdayData && isValidDate(yesterdayData.date)) 
-        ? yesterdayData.date 
-        : getYesterdayDate();
       meta.innerText = `日期：${date} ｜ 筆數：${count} ｜ 昨日：${y}`;
     }
 
