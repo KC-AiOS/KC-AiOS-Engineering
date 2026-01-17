@@ -224,17 +224,14 @@
       function renderMeta(todayData, yesterdayData) {
       const meta = document.getElementById("meta");
       
-      // 今日日期：使用 JSON 資料或當前日期
-      let date = todayData?.date;
-      if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-        const today = new Date();
-        date = today.toISOString().slice(0, 10);
-      }
+      // 今日日期：直接使用當前日期
+      const today = new Date();
+      const date = today.toISOString().slice(0, 10);
       
       // 昨日日期：根據今日日期計算
-      const today = new Date(date);
-      today.setDate(today.getDate() - 1);
-      const y = today.toISOString().slice(0, 10);
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      const y = yesterday.toISOString().slice(0, 10);
       
       const count = todayData?.items ? todayData.items.length : 0;
       meta.innerText = `日期：${date} ｜ 筆數：${count} ｜ 昨日：${y}`;
