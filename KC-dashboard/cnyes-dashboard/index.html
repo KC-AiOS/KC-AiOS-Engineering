@@ -221,10 +221,22 @@
     /* ============================================================================
      * Rendering
      * ============================================================================ */
+         function formatDate(dateString) {
+      if (!dateString || dateString === "N/A") {
+        // 如果沒有日期，使用當前日期
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      }
+      return dateString;
+    }
+
     function renderMeta(todayData, yesterdayData) {
       const meta = document.getElementById("meta");
-      const date = todayData.date || "N/A";
-      const count = todayData.items ? todayData.items.length : 0;
+      const date = formatDate(todayData?.date);
+      const count = todayData?.items ? todayData.items.length : 0;
       const y = yesterdayData ? yesterdayData.date : "無";
       meta.innerText = `日期：${date} ｜ 筆數：${count} ｜ 昨日：${y}`;
     }
