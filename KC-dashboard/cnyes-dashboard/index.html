@@ -221,21 +221,28 @@
     /* ============================================================================
      * Rendering
      * ============================================================================ */
-      function renderMeta(todayData, yesterdayData) {
-      const meta = document.getElementById("meta");
-      
-      // 今日日期：直接使用當前日期
-      const today = new Date();
-      const date = today.toISOString().slice(0, 10);
-      
-      // 昨日日期：根據今日日期計算
-      const yesterday = new Date(today);
-      yesterday.setDate(yesterday.getDate() - 1);
-      const y = yesterday.toISOString().slice(0, 10);
-      
-      const count = todayData?.items ? todayData.items.length : 0;
-      meta.innerText = `日期：${date} ｜ 筆數：${count} ｜ 昨日：${y}`;
-    }
+    function renderMeta(todayData, yesterdayData) {
+  const meta = document.getElementById("meta");
+
+  // 今日日期：優先使用 JSON
+  const date =
+    todayData?.date ||
+    new Date().toISOString().slice(0, 10);
+
+  // 昨日日期：優先用 JSON
+  const y =
+    yesterdayData?.date ||
+    (() => {
+      const d = new Date();
+      d.setDate(d.getDate() - 1);
+      return d.toISOString().slice(0, 10);
+    })();
+
+  const count = todayData?.items?.length ?? 0;
+
+  meta.innerText = `日期：${date} ｜ 筆數：${count} ｜ 昨日：${y}`;
+}
+
 
     function renderTableRange(range) {
       const container = document.getElementById("content");
