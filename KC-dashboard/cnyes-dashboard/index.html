@@ -221,25 +221,38 @@
     /* ============================================================================
      * Rendering
      * ============================================================================ */
-      function renderMeta(todayData, yesterdayData) {
-      const meta = document.getElementById("meta");
+  function renderMeta(todayData, yesterdayData) {
+  const meta = document.getElementById("meta");
+  if (!meta) return; // 安全檢查
 
-      // 今日日期：先用 JSON，再 fallback 到瀏覽器今日
-      const date = todayData?.date ?? new Date().toISOString().slice(0, 10);
+  const isValidDate = (d) => d && /^\d{4}-\d{2}-\d{2}$/.test(d);
 
-      // 昨日日期：先用 JSON，再 fallback 到 today - 1
-      const y =
-        yesterdayData?.date ??
-        (() => {
-          const d = new Date();
-          d.setDate(d.getDate() - 1);
-          return d.toISOString().slice(0, 10);
-        })();
+  // 取得本地日期的輔助函式 (避免時區錯誤)
+  const getLocalISODate = (d) => {
+    const offset = d.getTimezoneOffset();
+    const localDate = new Date(d.getTime() - (offset * 60 * 1000));
+    return localDate.toISOString().split('T')[0];
+  };
 
-      const count = todayData?.items?.length ?? 0;
+  // 1. 決定今日日期
+  const date = isValidDate(todayData?.date)
+    ? todayData.date
+    : getLocalISODate(new Date());
 
-      meta.innerText = `日期：${date} ｜ 筆數：${count} ｜ 昨日：${y}`;
-    }
+  // 2. 決定昨日日期
+  let y;
+  if (isValidDate(yesterdayData?.date)) {
+    y = yesterdayData.date;
+  } else {
+    // 基於已確定的 date 往前推一天
+    const baseDate = new Date(date);
+    baseDate.setDate(baseDate.getDate() - 1);
+    y = getLocalISODate(baseDate);
+  }
+
+  const count = todayData?.items?.length ?? 0;
+  meta.innerText = `日期：${date} ｜ 筆數：${count} ｜ 昨日：${y}`;
+}
 
 
     function renderTableRange(range) {
