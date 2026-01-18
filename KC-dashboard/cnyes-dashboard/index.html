@@ -218,107 +218,38 @@
       return { label: "⏸", cls: "delta-same" };
     }
 
-    /* ============================================================================
-     * Rendering
-     * ============================================================================ */
-  function renderMeta(todayData, yesterdayData) {
-    const meta = document.getElementById("meta");
-    if (!meta) return;
 
-    const isValidDate = (d) => d && /^\d{4}-\d{2}-\d{2}$/.test(d);
+/* ============================================================================
+ * Rendering
+ * ============================================================================ */
+function renderMeta(todayData, yesterdayData) {
+  const meta = document.getElementById("meta");
+  if (!meta) return;
 
-    // 1. 決定今日日期：優先取 JSON，無資料則取當下系統日期
-    const date = isValidDate(todayData?.date)
-      ? todayData.date
-      : new Date().toLocaleDateString('en-CA'); // 'en-CA' 會輸出 YYYY-MM-DD
-
-    // 2. 決定前一交易日：完全依賴昨天 JSON 的內容
-    // 如果 JSON 沒給日期，就顯示 "無歷史資料"，避免計算出錯誤的日期誤導投資判斷
-    const y = isValidDate(yesterdayData?.date)
-      ? yesterdayData.date
-      : "無歷史資料";
-
-    const count = todayData?.items?.length ?? 0;
-    
-    // 3. 渲染至畫面
-    meta.innerText = `日期：${date} ｜ 筆數：${count} ｜ 前一交易日：${y}`;
-  }
-
-  // 取得本地日期的輔助函式 (避免時區錯誤)
-  const getLocalISODate = (d) => {
-    const offset = d.getTimezoneOffset();
-    const localDate = new Date(d.getTime() - (offset * 60 * 1000));
-    return localDate.toISOString().split('T')[0];
-  };
+  const isValidDate = (d) => d && /^\d{4}-\d{2}-\d{2}$/.test(d);
 
   // 1. 決定今日日期
   const date = isValidDate(todayData?.date)
     ? todayData.date
-    : getLocalISODate(new Date());
+    : new Date().toLocaleDateString('en-CA');
 
-// 2. 決定昨日日期
-  // 修正：不再用 new Date() 盲目計算，而是直接取資料內的日期
-  // 如果資料內完全沒日期，顯示 "無資料" 或 "未定"，避免誤導
+  // 2. 決定前一交易日 (完全依賴資料庫)
   const y = isValidDate(yesterdayData?.date)
     ? yesterdayData.date
-    : "無歷史資料"; 
+    : "無歷史資料";
 
   const count = todayData?.items?.length ?? 0;
-  meta.innerText = `日期：${date} ｜ 筆數：${count} ｜ 前一交易日：${y}`;
+
+  // 3. 處理特殊狀態：若今日無資料且日期與昨日相同（通常是假日或未更新）
+  if (date === y || count === 0) {
+    meta.innerHTML = `<span style="color: #e67e22; font-weight: bold;">⚠️ 提示：今日 (${date}) 暫無開盤資料，目前顯示前一交易日 (${y}) 之排名</span>`;
+  } else {
+    // 4. 正常渲染
+    meta.innerText = `日期：${date} ｜ 筆數：${count} ｜ 前一交易日：${y}`;
+  }
 }
 
-    if (date === y && count === 0) {
-    meta.innerHTML = `<span style="color:orange;">⚠️ 今日 (${date}) 非交易日，顯示為前一交易日資料</span>`;
-}
-
-    function renderTableRange(range) {
-      const container = document.getElementById("content");
-
-      if (!State.todayData || !State.todayData.items) {
-        container.innerHTML = '<div class="error">目前無法取得資料，請檢查 data 資料夾。</div>';
-        return;
-      }
-
-      const items = State.todayData.items.slice(0, range);
-
-      let html = `
-        <table>
-          <thead>
-            <tr>
-              <th>Rank</th>
-              <th>變化</th>
-              <th>代碼</th>
-              <th>名稱</th>
-              <th>收盤價</th>
-              <th>漲跌幅 (%)</th>
-            </tr>
-          </thead>
-          <tbody>`;
-
-      items.forEach(item => {
-        const delta = calcDelta(item, State.yesterdayMap);
-        const close = Number(item.close);
-        const pct = Number(item.changePct);
-        const cls = pct >= 0 ? "up" : "down";
-
-        html += `
-          <tr>
-            <td>${item.rank}</td>
-            <td class="${delta.cls}">${delta.label}</td>
-            <td>${item.code}</td>
-            <td>${item.name}</td>
-            <td>${Number.isFinite(close) ? close.toFixed(2) : "0.00"}</td>
-            <td class="${cls}">${Number.isFinite(pct) ? pct.toFixed(2) : "0.00"}</td>
-          </tr>`;
-      });
-
-      html += `
-          </tbody>
-        </table>`;
-
-      container.innerHTML = html;
-    }
-
+    
     /* ============================================================================
      * Event Handlers
      * ============================================================================ */
