@@ -222,10 +222,27 @@
      * Rendering
      * ============================================================================ */
   function renderMeta(todayData, yesterdayData) {
-  const meta = document.getElementById("meta");
-  if (!meta) return; // 安全檢查
+    const meta = document.getElementById("meta");
+    if (!meta) return;
 
-  const isValidDate = (d) => d && /^\d{4}-\d{2}-\d{2}$/.test(d);
+    const isValidDate = (d) => d && /^\d{4}-\d{2}-\d{2}$/.test(d);
+
+    // 1. 決定今日日期：優先取 JSON，無資料則取當下系統日期
+    const date = isValidDate(todayData?.date)
+      ? todayData.date
+      : new Date().toLocaleDateString('en-CA'); // 'en-CA' 會輸出 YYYY-MM-DD
+
+    // 2. 決定前一交易日：完全依賴昨天 JSON 的內容
+    // 如果 JSON 沒給日期，就顯示 "無歷史資料"，避免計算出錯誤的日期誤導投資判斷
+    const y = isValidDate(yesterdayData?.date)
+      ? yesterdayData.date
+      : "無歷史資料";
+
+    const count = todayData?.items?.length ?? 0;
+    
+    // 3. 渲染至畫面
+    meta.innerText = `日期：${date} ｜ 筆數：${count} ｜ 前一交易日：${y}`;
+  }
 
   // 取得本地日期的輔助函式 (避免時區錯誤)
   const getLocalISODate = (d) => {
@@ -239,22 +256,20 @@
     ? todayData.date
     : getLocalISODate(new Date());
 
-  // 2. 決定昨日日期，若無則計算（排除週六日）
-const y = isValidDate(yesterdayData?.date)
-  ? yesterdayData.date
-  : (() => {
-      const d = new Date();
-      // 如果今天是週一(1)，昨天設為週五(-3)；如果是週日(0)，昨天設為週五(-2)
-      const dayOfWeek = d.getDay();
-      const offset = (dayOfWeek === 1) ? 3 : (dayOfWeek === 0 ? 2 : 1);
-      d.setDate(d.getDate() - offset);
-      return d.toISOString().slice(0, 10);
-    })();
+// 2. 決定昨日日期
+  // 修正：不再用 new Date() 盲目計算，而是直接取資料內的日期
+  // 如果資料內完全沒日期，顯示 "無資料" 或 "未定"，避免誤導
+  const y = isValidDate(yesterdayData?.date)
+    ? yesterdayData.date
+    : "無歷史資料"; 
 
   const count = todayData?.items?.length ?? 0;
   meta.innerText = `日期：${date} ｜ 筆數：${count} ｜ 前一交易日：${y}`;
 }
 
+    if (date === y && count === 0) {
+    meta.innerHTML = `<span style="color:orange;">⚠️ 今日 (${date}) 非交易日，顯示為前一交易日資料</span>`;
+}
 
     function renderTableRange(range) {
       const container = document.getElementById("content");
