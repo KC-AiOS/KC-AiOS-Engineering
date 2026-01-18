@@ -248,6 +248,54 @@ function renderMeta(todayData, yesterdayData) {
     meta.innerText = `日期：${date} ｜ 筆數：${count} ｜ 前一交易日：${y}`;
   }
 }
+    
+ /* ============================================================================
+ * renderTable
+ * ============================================================================ */
+    function renderTableRange(range) {
+  const container = document.getElementById("content");
+
+  if (!State.todayData || !State.todayData.items) {
+    container.innerHTML = '<div class="error">目前無法取得資料，請檢查 data 資料夾。</div>';
+    return;
+  }
+
+  const items = State.todayData.items.slice(0, range);
+
+  let html = `
+    <table>
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>變化</th>
+          <th>代碼</th>
+          <th>名稱</th>
+          <th>收盤價</th>
+          <th>漲跌幅 (%)</th>
+        </tr>
+      </thead>
+      <tbody>`;
+
+  items.forEach(item => {
+    const delta = calcDelta(item, State.yesterdayMap);
+    const close = Number(item.close);
+    const pct = Number(item.changePct);
+    const cls = pct >= 0 ? "up" : "down";
+
+    html += `
+      <tr>
+        <td>${item.rank}</td>
+        <td class="${delta.cls}">${delta.label}</td>
+        <td>${item.code}</td>
+        <td>${item.name}</td>
+        <td>${close.toFixed(2)}</td>
+        <td class="${cls}">${pct.toFixed(2)}</td>
+      </tr>`;
+  });
+
+  html += `</tbody></table>`;
+  container.innerHTML = html;
+}
 
     
     /* ============================================================================
