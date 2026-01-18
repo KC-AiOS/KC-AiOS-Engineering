@@ -239,19 +239,20 @@
     ? todayData.date
     : getLocalISODate(new Date());
 
-  // 2. 決定昨日日期
-  let y;
-  if (isValidDate(yesterdayData?.date)) {
-    y = yesterdayData.date;
-  } else {
-    // 基於已確定的 date 往前推一天
-    const baseDate = new Date(date);
-    baseDate.setDate(baseDate.getDate() - 1);
-    y = getLocalISODate(baseDate);
-  }
+  // 2. 決定昨日日期，若無則計算（排除週六日）
+const y = isValidDate(yesterdayData?.date)
+  ? yesterdayData.date
+  : (() => {
+      const d = new Date();
+      // 如果今天是週一(1)，昨天設為週五(-3)；如果是週日(0)，昨天設為週五(-2)
+      const dayOfWeek = d.getDay();
+      const offset = (dayOfWeek === 1) ? 3 : (dayOfWeek === 0 ? 2 : 1);
+      d.setDate(d.getDate() - offset);
+      return d.toISOString().slice(0, 10);
+    })();
 
   const count = todayData?.items?.length ?? 0;
-  meta.innerText = `日期：${date} ｜ 筆數：${count} ｜ 昨日：${y}`;
+  meta.innerText = `日期：${date} ｜ 筆數：${count} ｜ 前一交易日：${y}`;
 }
 
 
