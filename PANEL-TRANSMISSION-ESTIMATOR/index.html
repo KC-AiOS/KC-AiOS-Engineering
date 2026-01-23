@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <title>KC Panel Transmission Estimator v1.0</title>
+  <style>
+    body {
+      font-family: Arial, "Noto Sans TC", sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+      margin: 0;
+      padding: 24px;
+    }
+    h1 { font-size: 20px; margin-bottom: 6px; }
+    h2 { font-size: 16px; margin-top: 24px; }
+    .card {
+      background: #111827;
+      border: 1px solid #1f2937;
+      border-radius: 10px;
+      padding: 16px;
+      max-width: 720px;
+    }
+    label {
+      display: block;
+      margin-top: 12px;
+      font-size: 14px;
+      color: #9ca3af;
+    }
+    input, select {
+      width: 100%;
+      margin-top: 4px;
+      padding: 8px;
+      background: #020617;
+      color: #e5e7eb;
+      border: 1px solid #334155;
+      border-radius: 6px;
+    }
+    button {
+      margin-top: 16px;
+      padding: 10px 16px;
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .result {
+      margin-top: 16px;
+      padding: 12px;
+      background: #020617;
+      border-radius: 8px;
+      font-family: monospace;
+      white-space: pre-line;
+    }
+    .warn { color: #fbbf24; }
+  </style>
+</head>
+<body>
+
+<h1>KC-PANEL-TRANSMISSION-ESTIMATOR v1.0</h1>
+<p style="color:#9ca3af">Panel 穿透率工程估算（Pre-measurement）</p>
+
+<div class="card">
+
+  <h2>Input</h2>
+
+  <label>Aperture Ratio (0–1)
+    <input id="ar" type="number" step="0.001" value="0.58">
+  </label>
+
+  <label>CF NTSC (%)
+    <select id="cf">
+      <option value="0.34">45% (0.34)</option>
+      <option value="0.33">50% (0.33)</option>
+      <option value="0.32" selected>54% (0.32)</option>
+      <option value="0.30">60% (0.30)</option>
+    </select>
+  </label>
+
+  <label>Polarizer Type
+    <select id="pol">
+      <option value="0.38">NV (0.38)</option>
+      <option value="0.35" selected>SW / EV / WV (0.35)</option>
+    </select>
+  </label>
+
+  <label>Glass Transmittance
+    <input id="glass" type="number" step="0.01" value="0.95">
+  </label>
+
+  <button onclick="calc()">Calculate</button>
+
+  <div id="out" class="result"></div>
+
+</div>
+
+<script>
+function calc() {
+  const ar = parseFloat(arInput.value);
+  const tCF = parseFloat(cf.value);
+  const tPOL = parseFloat(pol.value);
+  const tGlass = parseFloat(glass.value);
+
+  const tPanel = ar * tGlass * tCF * tPOL;
+  const multiplier = 1 / tPanel;
+
+  let warn = "";
+  if (tPanel < 0.04) warn = "⚠ Panel 穿透率過低（高功耗路線）";
+  if (tPanel > 0.12) warn = "⚠ Panel 穿透率偏高，請檢查是否漏項";
+
+  out.textContent =
+`Panel Transmittance = ${(tPanel*100).toFixed(2)} %
+Brightness Multiplier = ${multiplier.toFixed(1)} x
+
+Assumptions:
+- CF Transmittance = ${tCF}
+- Polarizer = ${tPOL}
+- Glass = ${tGlass}
+
+${warn}`;
+}
+
+const arInput = document.getElementById("ar");
+const cf = document.getElementById("cf");
+const pol = document.getElementById("pol");
+const glass = document.getElementById("glass");
+const out = document.getElementById("out");
+
+calc();
+</script>
+
+</body>
+</html>
