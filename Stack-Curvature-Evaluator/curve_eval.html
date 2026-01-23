@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>KC-CURVE-WEB-EVAL v1.0</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 20px; }
+  table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+  th, td { border: 1px solid #aaa; padding: 6px; text-align: center; }
+  th { background: #eee; }
+  input { width: 80px; }
+  .btn { margin: 5px; }
+</style>
+</head>
+
+<body>
+
+<h2>KC-CURVE-WEB-EVAL v1.0</h2>
+
+<!-- Global Settings -->
+<h3>Global Settings</h3>
+Base Curvature Radius R0 (mm):
+<input id="R0" type="number" value="500" step="1">
+
+Curvature Type:
+<label><input type="radio" name="ctype" value="concave" checked> Concave</label>
+<label><input type="radio" name="ctype" value="convex"> Convex</label>
+
+<!-- Stack Definition -->
+<h3>Material Stack</h3>
+<table id="stackTable">
+<thead>
+<tr>
+  <th>#</th>
+  <th>Layer Name</th>
+  <th>Thickness (mm)</th>
+  <th>Enable</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
+<button class="btn" onclick="addLayer()">+ Add Layer</button>
+<button class="btn" onclick="calculate()">Calculate</button>
+
+<!-- Result -->
+<h3>Result</h3>
+<table id="resultTable">
+<thead>
+<tr>
+  <th>Layer</th>
+  <th>Thickness</th>
+  <th>dᵢ (mm)</th>
+  <th>Rᵢ (mm)</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
+<script>
+let layers = [
+  {name:"Cover Glass", t:1.8, en:true},
+  {name:"OCA", t:0.25, en:true},
+  {name:"Sensor Glass", t:0.4, en:true},
+  {name:"OCA", t:0.25, en:true},
+  {name:"Polarizer", t:0.162, en:true}
+];
+
+function renderStack() {
+  const tb = document.querySelector("#stackTable tbody");
+  tb.innerHTML = "";
+  layers.forEach((l,i)=>{
+    tb.innerHTML += `
+    <tr>
+      <td>${i+1}</td>
+      <td><input value="${l.name}" 
+          onchange="layers[${i}].name=this.value"></td>
+      <td><input type="number" step="0.001" value="${l.t}"
+          onchange="layers[${i}].t=parseFloat(this.value)"></td>
+      <td><input type="checkbox" ${l.en?"checked":""}
+          onchange="layers[${i}].en=this.checked"></td>
+    </tr>`;
+  });
+}
+
+function addLayer() {
+  layers.push({name:"New Layer", t:0.1, en:true});
+  renderStack();
+}
+
+function calculate() {
+  const R0 = parseFloat(document.getElementById("R0").value);
+  const type = document.querySelector("input[name=ctype]:checked").value;
+  const sign = (type==="concave") ? 1 : -1;
+
+  let active = layers.filter(l=>l.en);
+  let total = active.reduce((s,l)=>s+l.t,0);
+
+  let cursor = 0;
+  const res = document.querySelector("#resultTable tbody");
+  res.innerHTML = "";
+
+  active.forEach(l=>{
+    let di = cursor + l.t/2;
+    let Ri = R0 + sign * di;
+    res.innerHTML += `
+      <tr>
+        <td>${l.name}</td>
+        <td>${l.t.toFixed(3)}</td>
+        <td>${di.toFixed(3)}</td>
+        <td>${Ri.toFixed(2)}</td>
+      </tr>`;
+    cursor += l.t;
+  });
+}
+
+renderStack();
+calculate();
+</script>
+
+</body>
+</html>
