@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>KC Creo Web.Link MVP</title>
+
+<script type="text/javascript">
+/* ============================
+   KC-CAD-GRAMMAR (Minimal)
+   ============================ */
+
+function createExtrude() {
+
+  try {
+    /* 1. 取得 Creo Session */
+    var session = pfcGetProESession();
+    var model = session.GetCurrentModel();
+
+    if (model == null) {
+      alert("No active model.");
+      return;
+    }
+
+    /* 2. 使用者輸入（模擬 Grammar L2） */
+    var L = parseFloat(document.getElementById("L").value);
+    var W = parseFloat(document.getElementById("W").value);
+    var H = parseFloat(document.getElementById("H").value);
+
+    /* 3. 建立草圖平面（FRONT） */
+    var frontPlane = model.GetItemByName(
+      pfcCreate("pfcModelItemType").ITEM_DATUM,
+      "FRONT"
+    );
+
+    /* 4. 建立 Sketch */
+    var sketch = model.CreateSketch(frontPlane);
+
+    /* 5. 畫矩形（中心式） */
+    sketch.CreateRectangle(
+      pfcCreate("pfcPoint").Create(-L/2, -W/2),
+      pfcCreate("pfcPoint").Create(L/2,  W/2)
+    );
+
+    sketch.Regenerate();
+
+    /* 6. 建立 Extrude Feature */
+    var extrude = model.CreateExtrude(
+      sketch,
+      pfcCreate("pfcExtrudeOptions").CreateBlind(H)
+    );
+
+    /* 7. Regen */
+    model.Regenerate();
+
+    alert("Extrude created successfully.");
+
+  } catch (err) {
+    alert("Error: " + err);
+  }
+}
+</script>
+
+</head>
+
+<body>
+
+<h3>KC Creo Web.Link MVP</h3>
+
+<p>
+Length (L): <input id="L" type="number" value="30"><br>
+Width (W): <input id="W" type="number" value="50"><br>
+Height (H): <input id="H" type="number" value="100">
+</p>
+
+<button onclick="createExtrude()">CREATE EXTRUDE</button>
+
+</body>
+</html>
