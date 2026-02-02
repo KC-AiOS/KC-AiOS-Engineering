@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>KC-MODULE-COST-EVAL-MASTER</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont;
+      background: #f5f6f8;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 20px;
+    }
+    .card {
+      background: #fff;
+      padding: 16px;
+      margin-bottom: 16px;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    label {
+      display: block;
+      margin-top: 8px;
+      font-size: 13px;
+    }
+    input, select {
+      width: 100%;
+      padding: 6px;
+      margin-top: 4px;
+    }
+    button {
+      margin-top: 16px;
+      padding: 10px;
+      width: 100%;
+      background: #1f4fd8;
+      color: #fff;
+      border: none;
+      font-size: 15px;
+      cursor: pointer;
+    }
+    .result {
+      font-size: 15px;
+      margin-top: 8px;
+    }
+    .hint {
+      color: #666;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>KC-MODULE-COST-EVAL-MASTER</h1>
+<p class="hint">工程成本判斷工具（非精準報價）</p>
+
+<div class="card">
+  <h3>① 製程世界觀</h3>
+  <select id="process">
+    <option value="STAMP">沖壓 / 鈑金（STAMP）</option>
+    <option value="DIECAST">鋁 / 鎂壓鑄（DIE CAST）</option>
+    <option value="PLASTIC">塑膠射出（PLASTIC）</option>
+  </select>
+</div>
+
+<div class="card">
+  <h3>② 模組成本輸入（USD / set）</h3>
+
+  <label>M1｜Active IC</label>
+  <input type="number" id="m1" value="4.5" step="0.1">
+
+  <label>M2｜PCBA / Passive</label>
+  <input type="number" id="m2" value="1.5" step="0.1">
+
+  <label>M3｜Optical Stack</label>
+  <input type="number" id="m3" value="8.2" step="0.1">
+
+  <label>M4｜Mechanical</label>
+  <input type="number" id="m4" value="6.2" step="0.1">
+
+  <label>M5｜Interconnect (FPC / Connector)</label>
+  <input type="number" id="m5" value="2.0" step="0.1">
+
+  <label>M6｜Packing / Overhead</label>
+  <input type="number" id="m6" value="0.9" step="0.1">
+</div>
+
+<button onclick="calculate()">估算工程價格</button>
+
+<div class="card">
+  <h3>③ 結果輸出</h3>
+  <div class="result" id="fair"></div>
+  <div class="result" id="defense"></div>
+  <div class="hint" id="comment"></div>
+</div>
+
+<script>
+function calculate() {
+  const m1 = Number(m1El.value);
+  const m2 = Number(m2El.value);
+  const m3 = Number(m3El.value);
+  const m4 = Number(m4El.value);
+  const m5 = Number(m5El.value);
+  const m6 = Number(m6El.value);
+
+  const total = m1 + m2 + m3 + m4 + m5 + m6;
+
+  const fairLow = (total * 0.97).toFixed(2);
+  const fairHigh = (total * 1.03).toFixed(2);
+  const defense = (total * 1.08).toFixed(2);
+
+  document.getElementById("fair").innerHTML =
+    `工程合理價（Fair）：${fairLow} ~ ${fairHigh} USD / set`;
+
+  document.getElementById("defense").innerHTML =
+    `防守價（Defense）：≈ ${defense} USD / set`;
+
+  let comment = "成本主體：";
+  if (m3 > m4) comment += "Optical Stack";
+  else comment += "Mechanical 結構件";
+
+  document.getElementById("comment").innerHTML =
+    comment + "（優先工程優化對象）";
+}
+
+const m1El = document.getElementById("m1");
+const m2El = document.getElementById("m2");
+const m3El = document.getElementById("m3");
+const m4El = document.getElementById("m4");
+const m5El = document.getElementById("m5");
+const m6El = document.getElementById("m6");
+</script>
+
+</body>
+</html>
